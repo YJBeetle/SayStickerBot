@@ -196,15 +196,15 @@ bool MakeSticker(const Api &api, int64_t chatId,
             LogE("TgBot::Api::addStickerToSet: %s", e.what());
             return false;
         }
-        for (auto sticker : stickerSet->stickers)
-            try
-            {
-                api.deleteStickerFromSet(sticker->fileId); // 删除所有其他贴纸
-            }
-            catch (TgException &e)
-            {
-                LogE("TgBot::Api::deleteStickerFromSet: %s", e.what());
-            }
+        // for (auto sticker : stickerSet->stickers)
+        //     try
+        //     {
+        //         api.deleteStickerFromSet(sticker->fileId); // 删除所有其他贴纸
+        //     }
+        //     catch (TgException &e)
+        //     {
+        //         LogE("TgBot::Api::deleteStickerFromSet: %s", e.what());
+        //     }
     }
     else
     { // 没有找到贴纸 创建
