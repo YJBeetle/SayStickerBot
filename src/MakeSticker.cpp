@@ -57,18 +57,23 @@ shared_ptr<ArtRobot::Component::Base> drawImage(const string &__userPhotoData, c
                                                            "Noto Sans CJK SC",
                                                            600,
                                                            28,
-                                                           0, 0);
+                                                           0, 0,
+                                                           346);
     body->addChild(textName);
 
     auto content = make_shared<ArtRobot::Component::TextArea>("content", // content
-                                                              125, 71, 346, 407, 0,
+                                                              125, 71, 346, 417, 0,
                                                               __content,
                                                               "000000",
                                                               "Noto Sans CJK SC",
                                                               400,
                                                               28,
-                                                              0, 0);
+                                                              0, 0,
+                                                              -5);
     body->addChild(content);
+
+
+cout << content->realW() << content->realH() << endl;
 
     return body;
 }
@@ -133,7 +138,7 @@ bool MakeSticker(const Api &api, int64_t chatId,
         showName = user->firstName;
     else if (user->lastName.length())
         showName = user->lastName;
-        else
+    else
         showName = username;
 
     lowercase(username);
