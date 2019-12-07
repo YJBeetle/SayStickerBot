@@ -42,47 +42,46 @@ shared_ptr<ArtRobot::Component::Base> drawImage(const string &__userPhotoData, c
     if (hs < 0)
         hs = 0;
 
-    cout << ws <<" "<< hs<< endl;
+    cout << ws << " " << hs << endl;
 
     auto body = make_shared<ArtRobot::Component::Group>("body"); // body
 
-    auto bg = make_shared<ArtRobot::Component::Rectangle>("bg", 0, 0, 512, 512, 0, "79B3E2"); // bg
+    auto bg = make_shared<ArtRobot::Component::Rectangle>("bg", 0, 0, 512 - ws, 512 - hs, 0, "79B3E2"); // bg
     body->addChild(bg);
 
     vector<unsigned char> userPhotoData(__userPhotoData.begin(), __userPhotoData.end()); // 图片转为vector
     Mat userPhotoMat = imdecode(userPhotoData, IMREAD_COLOR);                            // 图片转为Mat
     auto userPhoto = make_shared<ArtRobot::Component::Image>("userPhoto",                // userPhoto
-                                                             16, 430,
+                                                             16, 430 - hs,
                                                              66, 66,
                                                              0,
                                                              userPhotoMat);
     auto userPhotoMask = make_shared<ArtRobot::Component::ImageMask>("userPhotoMask", // userPhotoMask
-                                                                     16, 430,
+                                                                     16, 430 - hs,
                                                                      66, 66,
                                                                      0,
                                                                      "SaySticker2_userPhotoMask.png",
                                                                      userPhoto);
     body->addChild(userPhotoMask);
 
-    auto messageShadow = make_shared<ArtRobot::Component::Rectangle>("messageShadow", 88, 496, 398, 4, 0, "00000010"); // messageShadow
+    auto messageShadow = make_shared<ArtRobot::Component::Rectangle>("messageShadow", 88, 496 - hs, 398 - ws, 4, 0, "00000010"); // messageShadow
     body->addChild(messageShadow);
 
-    auto messageShadow2 = make_shared<ArtRobot::Component::RectangleRound>("messageShadow2", 486, 486, 10, 14, 0, 0, 0, 10, 0, "00000010"); // messageShadow
+    auto messageShadow2 = make_shared<ArtRobot::Component::RectangleRound>("messageShadow2", 486 - ws, 486 - hs, 10, 14, 0, 0, 0, 10, 0, "00000010"); // messageShadow
     body->addChild(messageShadow2);
 
     auto messageX = make_shared<ArtRobot::Component::Image>("messageX", // messageX
-                                                            88, 474,
+                                                            88, 474 - hs,
                                                             12, 22,
                                                             0,
                                                             "SaySticker2_messageX.png");
     body->addChild(messageX);
 
-    auto messageBG = make_shared<ArtRobot::Component::RectangleRound>("messageBG", 100, 16, 396, 480, 0, 10, 10, 10, 0, "FFFFFF"); // messageBG
+    auto messageBG = make_shared<ArtRobot::Component::RectangleRound>("messageBG", 100, 16, 396 - ws, 480 - hs, 0, 10, 10, 10, 0, "FFFFFF"); // messageBG
     body->addChild(messageBG);
 
     body->addChild(textName);
     body->addChild(content);
-
 
     return body;
 }
