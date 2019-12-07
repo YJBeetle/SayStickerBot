@@ -1,6 +1,7 @@
 #include "MakeSticker.h"
 
 #include <iostream>
+#include <algorithm>
 
 #include "Log.h"
 #include "Global.h"
@@ -14,6 +15,35 @@ using namespace TgBot;
 // ArtRobot的实际绘制函数
 shared_ptr<ArtRobot::Component::Base> drawImage(const string &__userPhotoData, const string &__name, const string &__content)
 {
+    // 首先创建文字，因为需要计算其中宽高
+    auto textName = make_shared<ArtRobot::Component::Text>("textName",
+                                                           125, 59, 0, // 坐标
+                                                           __name,
+                                                           "BD4332",
+                                                           "Noto Sans CJK SC",
+                                                           600,  // 字重
+                                                           28,   // 字号
+                                                           0, 0, // 对齐方式
+                                                           346); // 最大宽度346
+    auto content = make_shared<ArtRobot::Component::TextArea>("content",
+                                                              125, 71, 346, 417, 0, // 坐标
+                                                              __content,
+                                                              "000000",
+                                                              "Noto Sans CJK SC",
+                                                              400,  // 字重
+                                                              28,   // 字号
+                                                              0, 0, // 对齐方式
+                                                              -5);  // 行距-5
+
+    double ws = 346 - max(content->realW(), textName->realW());
+    if (ws < 0)
+        ws = 0;
+    double hs = 407 - content->realH();
+    if (hs < 0)
+        hs = 0;
+
+    cout << ws <<" "<< hs<< endl;
+
     auto body = make_shared<ArtRobot::Component::Group>("body"); // body
 
     auto bg = make_shared<ArtRobot::Component::Rectangle>("bg", 0, 0, 512, 512, 0, "79B3E2"); // bg
@@ -50,30 +80,9 @@ shared_ptr<ArtRobot::Component::Base> drawImage(const string &__userPhotoData, c
     auto messageBG = make_shared<ArtRobot::Component::RectangleRound>("messageBG", 100, 16, 396, 480, 0, 10, 10, 10, 0, "FFFFFF"); // messageBG
     body->addChild(messageBG);
 
-    auto textName = make_shared<ArtRobot::Component::Text>("textName", // textName
-                                                           125, 59, 0,
-                                                           __name,
-                                                           "BD4332",
-                                                           "Noto Sans CJK SC",
-                                                           600,
-                                                           28,
-                                                           0, 0,
-                                                           346);
     body->addChild(textName);
-
-    auto content = make_shared<ArtRobot::Component::TextArea>("content", // content
-                                                              125, 71, 346, 417, 0,
-                                                              __content,
-                                                              "000000",
-                                                              "Noto Sans CJK SC",
-                                                              400,
-                                                              28,
-                                                              0, 0,
-                                                              -5);
     body->addChild(content);
 
-
-cout << content->realW() << content->realH() << endl;
 
     return body;
 }
