@@ -7,7 +7,6 @@
 #include "StringCheck.h"
 
 using namespace std;
-using namespace TgBot;
 
 UsersData::UsersData(const std::string &dbFile)
 {
