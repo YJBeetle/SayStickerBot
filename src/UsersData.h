@@ -14,6 +14,7 @@ private:
 
     sqlite3_stmt *stmtAdd;
     sqlite3_stmt *stmtRemove;
+    sqlite3_stmt *stmtSearchById;
     sqlite3_stmt *stmtSearchByUsername;
     sqlite3_stmt *stmtSearchByUsernameFuzzy;
     sqlite3_stmt *stmtSearchByUsernameAndContentFuzzy;
@@ -37,6 +38,7 @@ public:
     void add(int fromUserId, const std::string &fromUsername, const std::string &content, const std::string &fileId);
     void remove(int id);
 
+    std::vector<Column> searchById(int id);
     std::vector<Column> searchByUsername(const std::string &username);
     std::vector<Column> searchByUsernameFuzzy(const std::string &usernameKey);
     std::vector<Column> searchByUsernameAndContentFuzzy(const std::string &username, const std::string &contentKey);

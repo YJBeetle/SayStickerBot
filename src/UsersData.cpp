@@ -33,6 +33,10 @@ UsersData::UsersData(const std::string &dbFile)
     // 预编译一些常用的
     sqlite3_prepare_v2(db, R"(INSERT INTO  "messages" ("fromUserId", "fromUsername", "content", "fileId") VALUES (?, ?, ?, ?);)", -1, &stmtAdd, NULL);
     sqlite3_prepare_v2(db, R"(DELETE FROM "messages" WHERE "id" = ?;)", -1, &stmtRemove, NULL);
+    sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("id" = ?) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)",
+                       -1,
+                       &stmtSearchById,
+                       NULL);
     sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUsername" = ? COLLATE NOCASE) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)",
                        -1,
                        &stmtSearchByUsername,
@@ -68,9 +72,13 @@ UsersData::~UsersData()
 {
     sqlite3_finalize(stmtAdd);
     sqlite3_finalize(stmtRemove);
+    sqlite3_finalize(stmtSearchById);
     sqlite3_finalize(stmtSearchByUsername);
     sqlite3_finalize(stmtSearchByUsernameFuzzy);
+    sqlite3_finalize(stmtSearchByUsernameAndContentFuzzy);
+    sqlite3_finalize(stmtSearchByUserId);
     sqlite3_finalize(stmtSearchByUserIdAndContent);
+    sqlite3_finalize(stmtSearchByContentFuzzy);
     sqlite3_close(db);
 }
 
@@ -97,6 +105,26 @@ void UsersData::remove(int id)
         throw runtime_error("remove error");
     }
     sqlite3_reset(stmtRemove);
+}
+
+vector<UsersData::Column> UsersData::searchById(int id)
+{
+    vector<Column> ret;
+
+    sqlite3_bind_int(stmtSearchById, 1, id);
+    while (sqlite3_step(stmtSearchById) == SQLITE_ROW)
+    {
+        Column column;
+        column.id = sqlite3_column_int(stmtSearchById, 0);
+        column.fromUserId = sqlite3_column_int(stmtSearchById, 1);
+        column.fromUsername = (const char *)sqlite3_column_text(stmtSearchById, 2);
+        column.content = (const char *)sqlite3_column_text(stmtSearchById, 3);
+        column.fileId = (const char *)sqlite3_column_text(stmtSearchById, 4);
+        ret.push_back(column);
+    }
+    sqlite3_reset(stmtSearchById);
+
+    return ret;
 }
 
 vector<UsersData::Column> UsersData::searchByUsername(const string &username)
