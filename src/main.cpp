@@ -182,6 +182,10 @@ int main()
                 sendMessage(api, chatId, "只能管理自己的消息");
             }
         }
+        else
+        {
+            sendMessage(api, chatId, "语法： /delete id");
+        }
     });
 
     bot.getEvents().onUnknownCommand([&bot](Message::Ptr message) { // 未知指令
