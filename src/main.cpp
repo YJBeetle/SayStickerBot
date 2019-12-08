@@ -154,6 +154,24 @@ int main()
         sendMessage(api, chatId, retStr);
     });
 
+    bot.getEvents().onCommand("delete", [&bot](Message::Ptr message) { // /list
+        auto &api = bot.getApi();
+        auto chatId = message->chat->id;
+
+        auto &command = message->text;
+
+        if (StringTools::startsWith(command, "/delete ")) // "/delete <id>"
+        {
+            int id = std::stoi(command.substr(8));
+            auto ret = usersData->searchById(id);
+            if (ret.size() && ret[0].fromUserId == message->from->id)
+            {
+                usersData->remove(id);
+                sendMessage(api, chatId, "已删除");
+            }
+        }
+    });
+
     bot.getEvents().onUnknownCommand([&bot](Message::Ptr message) { // 未知指令
         auto &api = bot.getApi();
         auto chatId = message->chat->id;
