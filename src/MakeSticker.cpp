@@ -90,17 +90,17 @@ drawImage(const string &__userPhotoData, const string &__name, const string &__c
     return {body, realWidth, realHeight};
 }
 
-bool MakeSticker(const Api &api, int64_t chatId,
-                 User::Ptr user,
-                 const string &content,
-                 int32_t ownerId)
+string MakeSticker(const Api &api, int64_t chatId,
+                   User::Ptr user,
+                   const string &content,
+                   int32_t ownerId)
 {
     LogV("%s %d", user->username.c_str(), user->id);
 
     if (!checkSelf(user->id))
     {
         sendMessage(api, chatId, "哼～ (┙>∧<)┙彡 ┻━┻"); // 不允许收录自己
-        return false;
+        return "";
     }
 
     sendChatActionUploadPhoto(api, chatId); // 设置正在发送
@@ -113,7 +113,7 @@ bool MakeSticker(const Api &api, int64_t chatId,
     catch (TgException &e)
     {
         LogE("TgBot::Api::getUserProfilePhotos: %s", e.what());
-        return false;
+        return "";
     }
 
     string userPhotoData;           // 用户头像数据
@@ -128,14 +128,14 @@ bool MakeSticker(const Api &api, int64_t chatId,
         catch (TgException &e)
         {
             LogE("Get user photo error: %s", e.what());
-            return false;
+            return "";
         }
     }
     else
     {
         LogW("No photos.");
         sendMessage(api, chatId, "他没有头像 (◞‸◟)");
-        return false;
+        return "";
     }
 
     string title = user->username.empty() ? "Say" : "Say @" + user->username;
@@ -175,7 +175,7 @@ bool MakeSticker(const Api &api, int64_t chatId,
     catch (TgException &e)
     {
         LogE("TgBot::Api::uploadStickerFile: %s", e.what());
-        return false;
+        return "";
     }
 
     StickerSet::Ptr stickerSet;
@@ -198,7 +198,7 @@ bool MakeSticker(const Api &api, int64_t chatId,
         catch (TgException &e)
         {
             LogE("TgBot::Api::addStickerToSet: %s", e.what());
-            return false;
+            return "";
         }
         // for (auto sticker : stickerSet->stickers)
         //     try
@@ -221,7 +221,7 @@ bool MakeSticker(const Api &api, int64_t chatId,
             LogE("TgBot::Api::createNewStickerSet: %s", e.what());
             if (strcmp(e.what(), "Bad Request: PEER_ID_INVALID") == 0)
                 sendMessage(api, chatId, "贴图创建失败，原因是Telegram的服务器拒绝将你添加为该表情的所有者\n请尝试与我私聊重试");
-            return false;
+            return "";
         }
     }
 
@@ -234,10 +234,8 @@ bool MakeSticker(const Api &api, int64_t chatId,
     catch (TgException &e)
     {
         LogE("TgBot::Api::getStickerSet: %s", e.what());
-        return false;
+        return "";
     }
 
-    usersData->add(username, stickerFileId);
-
-    return sendSticker(api, chatId, stickerFileId);
+    return stickerFileId;
 }

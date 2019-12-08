@@ -22,7 +22,7 @@ using namespace TgBot;
 std::string botUsername;
 std::string botUsernameLowercase;
 int32_t botId = 0;
-UsersData * usersData;
+UsersData *usersData;
 
 int main()
 {
@@ -45,7 +45,17 @@ int main()
         {
             if (message->forwardFrom)
             {
-                MakeSticker(api, chatId, message->forwardFrom, message->text,message->from->id);
+                LogV("Forward message: fromUsername=%s, fromUserId=%d, content=%s",
+                     message->forwardFrom->username.c_str(),
+                     message->forwardFrom->id,
+                     message->text.c_str());
+
+                auto stickerFileId = MakeSticker(api, chatId, message->forwardFrom, message->text, message->from->id);
+                if (stickerFileId.length())
+                {
+                    usersData->add(message->forwardFrom->id, message->forwardFrom->username, message->text, stickerFileId);
+                    sendSticker(api, chatId, stickerFileId);
+                }
             }
             else
             { // 被转发用户的隐私设置原因无法获取uid
