@@ -107,9 +107,9 @@ link_directories(${WEBP_LIBDIR})
 
 ## SQLite3
 find_package(SQLite3)
-if (NOT SQLITE3_FOUND)
+if (NOT SQLite3_FOUND)
     pkg_check_modules(SQLite3 sqlite3)
-    if (NOT SQLITE3_FOUND)
+    if (NOT SQLite3_FOUND)
         message(FATAL_ERROR "SQLite3 not found!")
     endif ()
 endif ()
