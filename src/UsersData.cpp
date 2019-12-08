@@ -34,9 +34,30 @@ UsersData::UsersData(const std::string &dbFile)
     // 预编译一些常用的
     sqlite3_prepare_v2(db, R"(INSERT INTO  "messages" ("fromUserId", "fromUsername", "content", "fileId") VALUES (?, ?, ?, ?);)", -1, &stmtAdd, NULL);
     sqlite3_prepare_v2(db, R"(DELETE FROM "messages" WHERE "id" = ?;)", -1, &stmtRemove, NULL);
-    sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUsername" = ? COLLATE NOCASE) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)", -1, &stmtSearchByUsername, NULL);
-    sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUsername" LIKE ? COLLATE NOCASE) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)", -1, &stmtSearchByUsernameFuzzy, NULL);
-    sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUserId" = ?) AND ("content" = ?) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)", -1, &stmtSearchByUserIdAndContent, NULL);
+    sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUsername" = ? COLLATE NOCASE) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)",
+                       -1,
+                       &stmtSearchByUsername,
+                       NULL);
+    sqlite3_prepare_v2(db,
+                       R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUsername" LIKE ? COLLATE NOCASE) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)",
+                       -1,
+                       &stmtSearchByUsernameFuzzy,
+                       NULL);
+    sqlite3_prepare_v2(db,
+                       R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUsername" = ? COLLATE NOCASE) AND ("content" LIKE ? COLLATE NOCASE) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)",
+                       -1,
+                       &stmtSearchByUsernameAndContentFuzzy,
+                       NULL);
+    sqlite3_prepare_v2(db,
+                       R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUserId" = ?) AND ("content" = ?) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)",
+                       -1,
+                       &stmtSearchByUserIdAndContent,
+                       NULL);
+    sqlite3_prepare_v2(db,
+                       R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("content" LIKE ? COLLATE NOCASE) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)",
+                       -1,
+                       &stmtSearchByContentFuzzy,
+                       NULL);
 }
 
 UsersData::~UsersData()
@@ -114,6 +135,27 @@ vector<UsersData::Column> UsersData::searchByUsernameFuzzy(const string &usernam
     return ret;
 }
 
+vector<UsersData::Column> UsersData::searchByUsernameAndContentFuzzy(const string &username, const string &contentKey)
+{
+    vector<Column> ret;
+
+    sqlite3_bind_text(stmtSearchByUsernameAndContentFuzzy, 1, username.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmtSearchByUsernameAndContentFuzzy, 2, ("%" + contentKey + "%").c_str(), -1, SQLITE_STATIC);
+    while (sqlite3_step(stmtSearchByUsernameAndContentFuzzy) == SQLITE_ROW)
+    {
+        Column column;
+        column.id = sqlite3_column_int(stmtSearchByUsernameAndContentFuzzy, 0);
+        column.fromUserId = sqlite3_column_int(stmtSearchByUsernameAndContentFuzzy, 1);
+        column.fromUsername = (const char *)sqlite3_column_text(stmtSearchByUsernameAndContentFuzzy, 2);
+        column.content = (const char *)sqlite3_column_text(stmtSearchByUsernameAndContentFuzzy, 3);
+        column.fileId = (const char *)sqlite3_column_text(stmtSearchByUsernameAndContentFuzzy, 4);
+        ret.push_back(column);
+    }
+    sqlite3_reset(stmtSearchByUsernameAndContentFuzzy);
+
+    return ret;
+}
+
 vector<UsersData::Column> UsersData::searchByUserIdAndContent(int userId, const string &content)
 {
     vector<Column> ret;
@@ -131,6 +173,26 @@ vector<UsersData::Column> UsersData::searchByUserIdAndContent(int userId, const 
         ret.push_back(column);
     }
     sqlite3_reset(stmtSearchByUserIdAndContent);
+
+    return ret;
+}
+
+vector<UsersData::Column> UsersData::searchByContentFuzzy(const string &contentKey)
+{
+    vector<Column> ret;
+
+    sqlite3_bind_text(stmtSearchByContentFuzzy, 1, ("%" + contentKey + "%").c_str(), -1, SQLITE_STATIC);
+    while (sqlite3_step(stmtSearchByContentFuzzy) == SQLITE_ROW)
+    {
+        Column column;
+        column.id = sqlite3_column_int(stmtSearchByContentFuzzy, 0);
+        column.fromUserId = sqlite3_column_int(stmtSearchByContentFuzzy, 1);
+        column.fromUsername = (const char *)sqlite3_column_text(stmtSearchByContentFuzzy, 2);
+        column.content = (const char *)sqlite3_column_text(stmtSearchByContentFuzzy, 3);
+        column.fileId = (const char *)sqlite3_column_text(stmtSearchByContentFuzzy, 4);
+        ret.push_back(column);
+    }
+    sqlite3_reset(stmtSearchByContentFuzzy);
 
     return ret;
 }
