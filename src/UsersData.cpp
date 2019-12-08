@@ -34,8 +34,9 @@ UsersData::UsersData(const std::string &dbFile)
     // 预编译一些常用的
     sqlite3_prepare_v2(db, R"(INSERT INTO  "messages" ("fromUserId", "fromUsername", "content", "fileId") VALUES (?, ?, ?, ?);)", -1, &stmtAdd, NULL);
     sqlite3_prepare_v2(db, R"(DELETE FROM "messages" WHERE "id" = ?;)", -1, &stmtRemove, NULL);
-    sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE "fromUsername" = ? COLLATE NOCASE ORDER BY "id" DESC LIMIT 20 OFFSET 0;)", -1, &stmtSearchByUsername, NULL);
-    sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE "fromUsername" LIKE ? COLLATE NOCASE ORDER BY "id" DESC LIMIT 20 OFFSET 0;)", -1, &stmtSearchByUsernameFuzzy, NULL);
+    sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUsername" = ? COLLATE NOCASE) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)", -1, &stmtSearchByUsername, NULL);
+    sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUsername" LIKE ? COLLATE NOCASE) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)", -1, &stmtSearchByUsernameFuzzy, NULL);
+    sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUserId" = ?) AND ("content" = ?) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)", -1, &stmtSearchByUserIdAndContent, NULL);
 }
 
 UsersData::~UsersData()
@@ -44,6 +45,7 @@ UsersData::~UsersData()
     sqlite3_finalize(stmtRemove);
     sqlite3_finalize(stmtSearchByUsername);
     sqlite3_finalize(stmtSearchByUsernameFuzzy);
+    sqlite3_finalize(stmtSearchByUserIdAndContent);
     sqlite3_close(db);
 }
 
@@ -108,6 +110,27 @@ vector<UsersData::Column> UsersData::searchByUsernameFuzzy(const string &usernam
         ret.push_back(column);
     }
     sqlite3_reset(stmtSearchByUsernameFuzzy);
+
+    return ret;
+}
+
+vector<UsersData::Column> UsersData::searchByUserIdAndContent(int userId, const string &content)
+{
+    vector<Column> ret;
+
+    sqlite3_bind_int(stmtSearchByUserIdAndContent, 1, userId);
+    sqlite3_bind_text(stmtSearchByUserIdAndContent, 2, content.c_str(), -1, SQLITE_STATIC);
+    while (sqlite3_step(stmtSearchByUserIdAndContent) == SQLITE_ROW)
+    {
+        Column column;
+        column.id = sqlite3_column_int(stmtSearchByUserIdAndContent, 0);
+        column.fromUserId = sqlite3_column_int(stmtSearchByUserIdAndContent, 1);
+        column.fromUsername = (const char *)sqlite3_column_text(stmtSearchByUserIdAndContent, 2);
+        column.content = (const char *)sqlite3_column_text(stmtSearchByUserIdAndContent, 3);
+        column.fileId = (const char *)sqlite3_column_text(stmtSearchByUserIdAndContent, 4);
+        ret.push_back(column);
+    }
+    sqlite3_reset(stmtSearchByUserIdAndContent);
 
     return ret;
 }
