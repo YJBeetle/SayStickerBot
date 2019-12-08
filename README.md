@@ -7,11 +7,11 @@ Say Sticker.
 ```
 sudo apt-get install g++ make binutils cmake
 sudo apt-get install libssl-dev libboost-system-dev zlib1g-dev libcurl4-gnutls-dev
-sudo apt-get install libcairo2-dev libpango1.0-dev libopencv-dev librsvg2-dev libwebp-dev
+sudo apt-get install libcairo2-dev libpango1.0-dev libopencv-dev librsvg2-dev libwebp-dev libsqlite3-dev
 ```
 
 ```
-brew install openssl zlib cmake boost@1.59 pango
+brew install openssl zlib cmake boost@1.59 pango sqlite
 ```
 
 tgbot-cpp:
