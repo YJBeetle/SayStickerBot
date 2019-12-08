@@ -154,7 +154,7 @@ int main()
         sendMessage(api, chatId, retStr);
     });
 
-    bot.getEvents().onCommand("delete", [&bot](Message::Ptr message) { // /list
+    bot.getEvents().onCommand("delete", [&bot](Message::Ptr message) { // /delete
         auto &api = bot.getApi();
         auto chatId = message->chat->id;
 
@@ -167,6 +167,14 @@ int main()
             if (ret.size() && ret[0].fromUserId == message->from->id)
             {
                 usersData->remove(id);
+                try
+                {
+                    api.deleteStickerFromSet(ret[0].fileId); // 从tg服务器删除
+                }
+                catch (TgException &e)
+                {
+                    LogE("TgBot::Api::deleteStickerFromSet: %s", e.what());
+                }
                 sendMessage(api, chatId, "已删除");
             }
             else
