@@ -22,7 +22,7 @@ using namespace TgBot;
 std::string botUsername;
 std::string botUsernameLowercase;
 int32_t botId = 0;
-UsersData usersData;
+UsersData * usersData;
 
 int main()
 {
@@ -30,8 +30,7 @@ int main()
          << "|  SayStickerBot!  |" << endl
          << "====================" << endl;
 
-    // init
-    usersData.readFromFile();
+    usersData = new UsersData();
 
     string token = getenv("TOKEN");
     Bot bot(token);

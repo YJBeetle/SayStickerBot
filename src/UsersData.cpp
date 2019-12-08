@@ -7,68 +7,47 @@
 using namespace std;
 using namespace TgBot;
 
-UsersData::UsersData()
+UsersData::UsersData(const std::string &dbFile)
 {
+    int rc = sqlite3_open(dbFile.c_str(), &db);
+    if (rc)
+    {
+        sqlite3_close(db);
+        throw runtime_error("Can't open database");
+    }
 }
 
 UsersData::~UsersData()
 {
+    sqlite3_close(db);
 }
 
-void UsersData::readFromFile()
+void UsersData::add(const string &user, const string &fileId)
 {
-    ifstream in(USERDATAFILEPATH);
-    if (in)
-    {
-        string username;
-        string fileId;
-        while (getline(in, username) && getline(in, fileId))
-            data[username] = fileId;
-    }
+    ;
 }
 
-void UsersData::saveToFile()
+void UsersData::remove(const string &user, const string &fileId)
 {
-    ofstream out(USERDATAFILEPATH);
-    for (auto &user : data)
-    {
-        out << user.first << endl;
-        out << user.second << endl;
-    }
+    ;
 }
 
-string searchFileIdByUsername(const Api &api, const string &__username)
+vector<string> UsersData::searchByUsername(const Api &api, const string &__username)
 {
     string username = __username;
     fixUsername(username);
     lowercase(username);
 
-    if (!checkSelf(username)) // 不允许丢自己
-        return "";
+    vector<string> ret;
 
-    auto s = usersData.data.find(username);
-    if (s != usersData.data.end())
-    {
-        return s->second;
-    }
-    else
-    { // 如果找不到则去tg服务器上搜索
-        string stickerName = getStickerName(username); // 贴纸名字
-        try
-        {
-            auto stickerSet = api.getStickerSet(stickerName);
-            if (stickerSet->stickers.size())
-            {
-                auto fileId = stickerSet->stickers[0]->fileId;
-                usersData.set(username, fileId);
-                return fileId;
-            }
-            else
-                return "";
-        }
-        catch (const std::exception &e)
-        {
-            return "";
-        }
-    }
+    if (!checkSelf(username)) // 不允许丢自己
+        return ret;
+
+    // auto s = data.find(username);
+    // if (s != data.end())
+    // {
+    //     ret.push_back(s->second);
+    // }
+
+    return ret;
 }

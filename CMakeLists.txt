@@ -84,7 +84,7 @@ include_directories(${RSVG_INCLUDE_DIRS})
 link_directories(${RSVG_LIBDIR})
 link_directories(${RSVG_LIBRARY_DIRS})
 
-# Find OpenCV
+## OpenCV
 find_package(OpenCV REQUIRED)
 message(STATUS "OpenCV library status:")
 message(STATUS "    version: ${OpenCV_VERSION}")
@@ -95,7 +95,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 ## libwebp
 pkg_check_modules(WEBP libwebp)
 if (NOT WEBP_FOUND)
-message(FATAL_ERROR "libwebp not found!")
+    message(FATAL_ERROR "libwebp not found!")
 endif ()
 message(STATUS "libwebp library status:")
 message(STATUS "    version: ${WEBP_VERSION}")
@@ -104,6 +104,17 @@ message(STATUS "    lib path: ${WEBP_LIBDIR}")
 message(STATUS "    libraries: ${WEBP_LIBRARIES}")
 include_directories(${WEBP_INCLUDE_DIRS})
 link_directories(${WEBP_LIBDIR})
+
+## SQLite3
+find_package(SQLite3)
+if (NOT SQLITE3_FOUND)
+    message(FATAL_ERROR "SQLite3 not found!")
+endif ()
+message(STATUS "SQLite3 library status:")
+message(STATUS "    version: ${SQLite3_VERSION}")
+message(STATUS "    include path: ${SQLite3_INCLUDE_DIRS}")
+message(STATUS "    libraries: ${SQLite3_LIBRARIES}")
+include_directories(${SQLite3_INCLUDE_DIRS})
 
 set(LIB_LIST
     ${CMAKE_THREAD_LIBS_INIT}
@@ -118,6 +129,7 @@ set(LIB_LIST
     ${OpenCV_LIBS}
     ${WEBP_LIBRARIES}
     ArtRobot
+    ${SQLite3_LIBRARIES}
 )
 
 # building project

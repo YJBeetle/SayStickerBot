@@ -233,7 +233,7 @@ bool MakeSticker(const Api &api, int64_t chatId,
         return false;
     }
 
-    usersData.set(username, stickerFileId);
+    usersData->add(username, stickerFileId);
 
     return sendSticker(api, chatId, stickerFileId);
 }

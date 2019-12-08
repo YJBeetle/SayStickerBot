@@ -4,26 +4,21 @@
 #include <string>
 #include <unordered_map>
 #include <tgbot/tgbot.h>
+#include <sqlite3.h>
 
 #define USERDATAFILEPATH "UsersData.txt"
 
 class UsersData
 {
 private:
-public:
-    std::unordered_map<std::string, std::string> data;
+    sqlite3 *db;
+    // std::unordered_map<std::string, std::string> data;
 
-    UsersData();
+public:
+    UsersData(const std::string &dbFile = "UsersData.db");
     ~UsersData();
 
-    void readFromFile();
-    void saveToFile();
-
-    inline void set(const std::string &user, const std::string &fileId)
-    {
-        data[user] = fileId;
-        saveToFile();
-    }
+    void add(const std::string &user, const std::string &fileId);
+    void remove(const std::string &user, const std::string &fileId);
+    std::vector<std::string> searchByUsername(const TgBot::Api &api, const std::string &__username);
 };
-
-std::string searchFileIdByUsername(const TgBot::Api &api, const std::string &__username);
