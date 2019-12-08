@@ -48,6 +48,11 @@ UsersData::UsersData(const std::string &dbFile)
                        &stmtSearchByUsernameAndContentFuzzy,
                        NULL);
     sqlite3_prepare_v2(db,
+                       R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUserId" = ?) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)",
+                       -1,
+                       &stmtSearchByUserId,
+                       NULL);
+    sqlite3_prepare_v2(db,
                        R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUserId" = ?) AND ("content" = ?) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)",
                        -1,
                        &stmtSearchByUserIdAndContent,
@@ -151,6 +156,26 @@ vector<UsersData::Column> UsersData::searchByUsernameAndContentFuzzy(const strin
         ret.push_back(column);
     }
     sqlite3_reset(stmtSearchByUsernameAndContentFuzzy);
+
+    return ret;
+}
+
+vector<UsersData::Column> UsersData::searchByUserId(int userId)
+{
+    vector<Column> ret;
+
+    sqlite3_bind_int(stmtSearchByUserId, 1, userId);
+    while (sqlite3_step(stmtSearchByUserId) == SQLITE_ROW)
+    {
+        Column column;
+        column.id = sqlite3_column_int(stmtSearchByUserId, 0);
+        column.fromUserId = sqlite3_column_int(stmtSearchByUserId, 1);
+        column.fromUsername = (const char *)sqlite3_column_text(stmtSearchByUserId, 2);
+        column.content = (const char *)sqlite3_column_text(stmtSearchByUserId, 3);
+        column.fileId = (const char *)sqlite3_column_text(stmtSearchByUserId, 4);
+        ret.push_back(column);
+    }
+    sqlite3_reset(stmtSearchByUserId);
 
     return ret;
 }
