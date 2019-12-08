@@ -36,12 +36,29 @@ void pushStickerByUsernameFuzzy(const Api &api,
                                 vector<InlineQueryResult::Ptr> &results,
                                 const string &usernameKey)
 {
+    auto ret = usersData->searchByUsernameFuzzy(usernameKey);
+    for (auto c : ret)
+    {
+        auto result = make_shared<InlineQueryResultCachedSticker>();
+        result->id = c.id;
+        result->stickerFileId = c.fileId;
+        results.push_back(result);
+    }
 }
 
 void pushStickerByUsernameAndContentFuzzy(const Api &api,
                                           vector<InlineQueryResult::Ptr> &results,
-                                          const string &usernameKey)
+                                          const string &username,
+                                          const string &contentKey)
 {
+    auto ret = usersData->searchByUsernameAndContentFuzzy(username, contentKey);
+    for (auto c : ret)
+    {
+        auto result = make_shared<InlineQueryResultCachedSticker>();
+        result->id = c.id;
+        result->stickerFileId = c.fileId;
+        results.push_back(result);
+    }
 }
 
 void pushStickerByContentFuzzy(const Api &api,
@@ -64,7 +81,11 @@ void pushStickerOnInlineQuery(const Api &api,
 {
     if (query.c_str()[0] == '@')
     {
-        pushStickerByUsernameFuzzy(api, results, query.c_str() + 1);
+        auto p = query.find(' ');
+        if (p == string::npos)
+            pushStickerByUsernameFuzzy(api, results, query.c_str() + 1);
+        else
+            pushStickerByUsernameAndContentFuzzy(api, results, query.substr(0, p), query.substr(p));
     }
     else
         pushStickerByContentFuzzy(api, results, query);
