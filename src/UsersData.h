@@ -15,12 +15,24 @@ private:
     sqlite3_stmt *stmtAdd;
     sqlite3_stmt *stmtRemove;
     sqlite3_stmt *stmtSearchByUsername;
+    sqlite3_stmt *stmtSearchByUsernameFuzzy;
 
 public:
+    struct Column
+    {
+        int id;
+        int fromUserId;
+        std::string fromUsername;
+        std::string content;
+        std::string fileId;
+    };
+
     UsersData(const std::string &dbFile = "UsersData.db");
     ~UsersData();
 
-    void add( int fromUserId, const std::string &fromUsername, const std::string &content, const std::string &fileId);
+    void add(int fromUserId, const std::string &fromUsername, const std::string &content, const std::string &fileId);
     void remove(int id);
-    std::vector<std::string> searchByUsernameFuzzy( const std::string &__username);
+
+    std::vector<Column> searchByUsername(const std::string &username);
+    std::vector<Column> searchByUsernameFuzzy(const std::string &usernameKey);
 };
