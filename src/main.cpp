@@ -1,6 +1,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <algorithm>
 
 #include <opencv2/opencv.hpp>
@@ -96,14 +97,26 @@ int main()
         auto &api = bot.getApi();
         auto chatId = message->chat->id;
 
-        sendMessage(api, chatId, "喵～");
+        sendMessage(api, chatId, "欢迎使用贴纸语录机器人。");
     });
 
-    bot.getEvents().onCommand("throw", [&bot](Message::Ptr message) { // /throw
+    bot.getEvents().onCommand("list", [&bot](Message::Ptr message) { // /list
         auto &api = bot.getApi();
         auto chatId = message->chat->id;
 
-        sendMessage(api, chatId, "喵～");
+        string retStr;
+        if (message->text == "/list")
+        {
+            auto ret = usersData->searchByUserId(message->from->id);
+            stringstream ss;
+            for (auto c : ret)
+            {
+                ss << c.id << " " << c.content << "\n";
+            }
+            retStr = ss.str();
+        }
+
+        sendMessage(api, chatId, retStr);
     });
 
     bot.getEvents().onUnknownCommand([&bot](Message::Ptr message) { // 未知指令

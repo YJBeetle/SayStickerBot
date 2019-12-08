@@ -5,6 +5,6 @@
 #include <ArtRobot/ArtRobot.h>
 
 std::string MakeSticker(const TgBot::Api &api, int64_t chatId,
-                 TgBot::User::Ptr user,
-                 const std::string &content,
-                 int32_t ownerId);
+                        TgBot::User::Ptr user,
+                        const std::string &content,
+                        int32_t ownerId);
