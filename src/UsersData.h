@@ -3,7 +3,6 @@
 #include <fstream>
 #include <string>
 #include <unordered_map>
-#include <tgbot/tgbot.h>
 #include <sqlite3.h>
 
 #define USERDATAFILEPATH "UsersData.txt"
@@ -12,13 +11,16 @@ class UsersData
 {
 private:
     sqlite3 *db;
-    // std::unordered_map<std::string, std::string> data;
+
+    sqlite3_stmt *stmtAdd;
+    sqlite3_stmt *stmtRemove;
+    sqlite3_stmt *stmtSearchByUsername;
 
 public:
     UsersData(const std::string &dbFile = "UsersData.db");
     ~UsersData();
 
-    void add(const std::string &user, const std::string &fileId);
-    void remove(const std::string &user, const std::string &fileId);
-    std::vector<std::string> searchByUsername(const TgBot::Api &api, const std::string &__username);
+    void add( int fromUserId, const std::string &fromUsername, const std::string &content, const std::string &fileId);
+    void remove(int id);
+    std::vector<std::string> searchByUsernameFuzzy( const std::string &__username);
 };
