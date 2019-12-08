@@ -169,6 +169,10 @@ int main()
                 usersData->remove(id);
                 sendMessage(api, chatId, "已删除");
             }
+            else
+            {
+                sendMessage(api, chatId, "只能管理自己的消息");
+            }
         }
     });
 
@@ -178,7 +182,7 @@ int main()
 
         if (message->chat->type == Chat::Type::Private)
         { // 私聊
-            sendMessage(api, chatId, "你在说什么？\n如果想要什么帮助的话请给我发 /help");
+            sendMessage(api, chatId, "如果想要什么帮助的话请给我发 /help");
         }
     });
 
