@@ -46,14 +46,16 @@ void pushStickerByUsernameAndContentFuzzy(const Api &api,
 
 void pushStickerByContentFuzzy(const Api &api,
                                vector<InlineQueryResult::Ptr> &results,
-                               const string &usernameKey)
+                               const string &contentKey)
 {
-    // auto ret = usersData->searchByUsername("yjbeetle");
-    // // auto ret = usersData->searchByUserIdAndContent( 110265631 , "xxx");
-    // for (auto c : ret)
-    // {
-    //     cout << c.id << " " << c.content << endl;
-    // }
+    auto ret = usersData->searchByContentFuzzy(contentKey);
+    for (auto c : ret)
+    {
+        auto result = make_shared<InlineQueryResultCachedSticker>();
+        result->id = c.id;
+        result->stickerFileId = c.fileId;
+        results.push_back(result);
+    }
 }
 
 void pushStickerOnInlineQuery(const Api &api,
