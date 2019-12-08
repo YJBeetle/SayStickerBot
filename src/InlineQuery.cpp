@@ -39,6 +39,7 @@ void pushStickerByUsernameFuzzy(const Api &api,
     auto ret = usersData->searchByUsernameFuzzy(usernameKey);
     for (auto c : ret)
     {
+        LogV("%d %s", c.id, c.fileId.c_str());
         auto result = make_shared<InlineQueryResultCachedSticker>();
         result->id = c.id;
         result->stickerFileId = c.fileId;
@@ -54,6 +55,7 @@ void pushStickerByUsernameAndContentFuzzy(const Api &api,
     auto ret = usersData->searchByUsernameAndContentFuzzy(username, contentKey);
     for (auto c : ret)
     {
+        LogV("%d %s", c.id, c.fileId.c_str());
         auto result = make_shared<InlineQueryResultCachedSticker>();
         result->id = c.id;
         result->stickerFileId = c.fileId;
@@ -68,6 +70,7 @@ void pushStickerByContentFuzzy(const Api &api,
     auto ret = usersData->searchByContentFuzzy(contentKey);
     for (auto c : ret)
     {
+        LogV("%d %s", c.id, c.fileId.c_str());
         auto result = make_shared<InlineQueryResultCachedSticker>();
         result->id = c.id;
         result->stickerFileId = c.fileId;
