@@ -110,8 +110,11 @@ int main()
         auto &api = bot.getApi();
         auto chatId = message->chat->id;
 
+        auto &command = message->text;
+
         string retStr;
-        if (message->text == "/list")
+        if (command == "/list" ||                       // "/list"
+            command == "/list@" + botUsernameLowercase) // "/list@SayStkBot"
         {
             auto ret = usersData->searchByUserId(message->from->id);
             stringstream ss;
@@ -121,6 +124,28 @@ int main()
             }
             retStr = ss.str();
         }
+        else if (StringTools::startsWith(command, "/list ") || // "/list <Username>"
+                 StringTools::startsWith(command, "/list@"))   // "/list@<Username>", "/list@SayStkBot <Username>"
+        {
+            string username;
+            if (StringTools::startsWith(command, "/list@" + botUsernameLowercase + " ") || // "/list@SayStkBot <Username>"
+                StringTools::startsWith(command, "/list@" + botUsernameLowercase + "@"))   // "/list@SayStkBot@<Username>"
+                username = message->text.c_str() + 6 /* strlen("/list@") */ + botUsernameLowercase.length() + 1 /* strlen( ) || strlen(@) */;
+            else if (StringTools::startsWith(command, "/list @" + botUsernameLowercase + " ") || // "/list @SayStkBot <Username>"
+                     StringTools::startsWith(command, "/list @" + botUsernameLowercase + "@"))   // "/list @SayStkBot@<Username>"
+                username = message->text.c_str() + 7 /* strlen("/list @") */ + botUsernameLowercase.length() + 1 /* strlen( ) || strlen(@) */;
+            else
+                username = message->text.c_str() + 6 /* strlen("/list ") || strlen("/list@") */;
+
+            auto ret = usersData->searchByUsername(username);
+            stringstream ss;
+            for (auto c : ret)
+            {
+                ss << c.id << " " << c.content << "\n";
+            }
+            retStr = ss.str();
+        }
+
         if (retStr.length() == 0)
         {
             retStr = "没有内容.";
