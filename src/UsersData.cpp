@@ -91,7 +91,7 @@ void UsersData::add(int fromUserId, const string &fromUsername, const string &co
     int rc = sqlite3_step(stmtAdd);
     if (SQLITE_DONE != rc)
     {
-        throw runtime_error("add error");
+        // throw runtime_error("add error");
     }
     sqlite3_reset(stmtAdd);
 }
@@ -102,7 +102,7 @@ void UsersData::remove(int id)
     int rc = sqlite3_step(stmtRemove);
     if (SQLITE_DONE != rc)
     {
-        throw runtime_error("remove error");
+        // throw runtime_error("remove error");
     }
     sqlite3_reset(stmtRemove);
 }
