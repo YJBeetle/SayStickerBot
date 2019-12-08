@@ -121,6 +121,10 @@ int main()
             }
             retStr = ss.str();
         }
+        if (retStr.length() == 0)
+        {
+            retStr = "没有内容.";
+        }
 
         sendMessage(api, chatId, retStr);
     });
