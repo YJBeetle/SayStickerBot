@@ -45,16 +45,27 @@ int main()
         {
             if (message->forwardFrom)
             {
+                string &fromUsername = message->forwardFrom->username;
+                int fromUserId = message->forwardFrom->id;
+                string &content = message->text;
                 LogV("Forward message: fromUsername=%s, fromUserId=%d, content=%s",
-                     message->forwardFrom->username.c_str(),
-                     message->forwardFrom->id,
-                     message->text.c_str());
+                     fromUsername.c_str(),
+                     fromUserId,
+                     content.c_str());
 
-                auto stickerFileId = MakeSticker(api, chatId, message->forwardFrom, message->text, message->from->id);
-                if (stickerFileId.length())
-                {
-                    usersData->add(message->forwardFrom->id, message->forwardFrom->username, message->text, stickerFileId);
-                    sendSticker(api, chatId, stickerFileId);
+                auto ret = usersData->searchByUserIdAndContent(fromUserId, content); // 搜索是否已经存在
+                if (ret.size() == 0)
+                { // 不存在
+                    auto stickerFileId = MakeSticker(api, chatId, message->forwardFrom, content, message->from->id);
+                    if (stickerFileId.length())
+                    { // 成功
+                        usersData->add(message->forwardFrom->id, message->forwardFrom->username, message->text, stickerFileId);
+                        sendSticker(api, chatId, stickerFileId);
+                    }
+                }
+                else
+                {                                            // 存在
+                    sendSticker(api, chatId, ret[0].fileId); // 直接返回
                 }
             }
             else
