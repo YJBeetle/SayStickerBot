@@ -13,7 +13,8 @@ using namespace cv;
 using namespace TgBot;
 
 // ArtRobot的实际绘制函数
-shared_ptr<ArtRobot::Component::Base> drawImage(const string &__userPhotoData, const string &__name, const string &__content)
+std::tuple<shared_ptr<ArtRobot::Component::Base>, double, double>
+drawImage(const string &__userPhotoData, const string &__name, const string &__content)
 {
     // 首先创建文字，因为需要计算其中宽高
     auto textName = make_shared<ArtRobot::Component::Text>("textName",
@@ -83,7 +84,10 @@ shared_ptr<ArtRobot::Component::Base> drawImage(const string &__userPhotoData, c
     body->addChild(textName);
     body->addChild(content);
 
-    return body;
+    double realWidth = 512 - ws,
+           realHeight = 512 - hs;
+
+    return {body, realWidth, realHeight};
 }
 
 bool MakeSticker(const Api &api, int64_t chatId,
@@ -154,9 +158,9 @@ bool MakeSticker(const Api &api, int64_t chatId,
 
     LogV("username=%s, title=%s, ownerId=%d, stickerName=%s", username.c_str(), title.c_str(), ownerId, stickerName.c_str());
 
-    auto body = drawImage(userPhotoData, showName, content); // 绘制图像
+    auto [body, realWidth, realHeight] = drawImage(userPhotoData, showName, content); // 绘制图像
 
-    ArtRobot::Renderer renderer(ArtRobot::OutputTypePng, 512, 512, ArtRobot::Renderer::PX, 72); // 渲染png
+    ArtRobot::Renderer renderer(ArtRobot::OutputTypePng, 512, realHeight, ArtRobot::Renderer::PX, 72); // 渲染png
     renderer.render(body->getSurface());
 
     auto stickerPngFile = make_shared<InputFile>(); // 待上传的PNG文件
