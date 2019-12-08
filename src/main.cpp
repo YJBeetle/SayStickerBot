@@ -11,7 +11,7 @@
 #include "Log.h"
 #include "UsersData.h"
 #include "MakeSticker.h"
-// #include "InlineQuery.h"
+#include "InlineQuery.h"
 #include "Tg.h"
 #include "StringCheck.h"
 
@@ -123,13 +123,7 @@ int main()
 
         vector<InlineQueryResult::Ptr> results; // 准备results
 
-        // if (query.c_str()[0] == '@') // 首位是@的话进行精确匹配
-        //     pushStickerToResultByUsername(bot.getApi(), results, query.c_str() + 1);
-        // else
-        //     pushStickerToResultByUsernameFuzzy(bot.getApi(), results, query);
-
-        // if (results.size() == 0) // 如果列表依然是空的，则显示按钮用于创建
-        //     pushClickToThrow(bot.getApi(), results, query);
+        pushStickerOnInlineQuery(bot.getApi(), results, query);
 
         // debug json
         // TgTypeParser tgTypeParser;
@@ -142,21 +136,6 @@ int main()
         catch (TgException &e)
         {
             LogE("answerInlineQuery: %s", e.what());
-        }
-    });
-
-    bot.getEvents().onCallbackQuery([&bot](CallbackQuery::Ptr callbackQuery) {
-        auto &username = callbackQuery->data;
-
-        LogI("onCallbackQuery: %s: %s", callbackQuery->from->username.c_str(), username.c_str());
-
-        try
-        {
-            bot.getApi().answerCallbackQuery(callbackQuery->id, "喵～");
-        }
-        catch (TgException &e)
-        {
-            LogE("TgBot::Api::answerCallbackQuery: %s", e.what());
         }
     });
 
