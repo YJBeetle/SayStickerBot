@@ -54,6 +54,12 @@ int main()
                      fromUserId,
                      content.c_str());
 
+                if (fromUserId == botId)
+                {
+                    sendMessage(api, chatId, "哼～ (┙>∧<)┙彡 ┻━┻"); // 禁止收录自己
+                    return;
+                }
+
                 auto ret = usersData->searchByUserIdAndContent(fromUserId, content); // 搜索是否已经存在
                 if (ret.size() == 0)
                 { // 不存在
