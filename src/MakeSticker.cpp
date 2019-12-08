@@ -156,7 +156,7 @@ string MakeSticker(const Api &api, int64_t chatId,
     lowercase(username);
     string stickerName = getStickerName(username); // 贴纸名字
 
-    LogV("username=%s, title=%s, ownerId=%d, stickerName=%s", username.c_str(), title.c_str(), ownerId, stickerName.c_str());
+    LogV("title=%s, ownerId=%d, stickerName=%s", title.c_str(), ownerId, stickerName.c_str());
 
     auto [body, realWidth, realHeight] = drawImage(userPhotoData, showName, content); // 绘制图像
 
@@ -193,7 +193,7 @@ string MakeSticker(const Api &api, int64_t chatId,
     { // 存在贴纸包
         try
         {
-            api.addStickerToSet(ownerId, stickerName, stickerFile->fileId, "🙃"); // 添加贴纸到贴纸包
+            api.addStickerToSet(ownerId, stickerName, stickerFile->fileId, "💬"); // 添加贴纸到贴纸包
         }
         catch (TgException &e)
         {
@@ -214,13 +214,13 @@ string MakeSticker(const Api &api, int64_t chatId,
     { // 没有找到贴纸 创建
         try
         {
-            api.createNewStickerSet(ownerId, stickerName, title, stickerFile->fileId, "🙃"); // 创建贴纸包并添加第一个贴纸
+            api.createNewStickerSet(ownerId, stickerName, title, stickerFile->fileId, "💬"); // 创建贴纸包并添加第一个贴纸
         }
         catch (TgException &e)
         {
             LogE("TgBot::Api::createNewStickerSet: %s", e.what());
             if (strcmp(e.what(), "Bad Request: PEER_ID_INVALID") == 0)
-                sendMessage(api, chatId, "贴图创建失败，原因是Telegram的服务器拒绝将你添加为该表情的所有者\n请尝试与我私聊重试");
+                sendMessage(api, chatId, "贴图创建失败，原因是Telegram的服务器拒绝将你添加为该表情的所有者");
             return "";
         }
     }
