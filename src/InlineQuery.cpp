@@ -88,7 +88,7 @@ void pushStickerOnInlineQuery(const Api &api,
         if (p == string::npos)
             pushStickerByUsernameFuzzy(api, results, query.substr(1));
         else
-            pushStickerByUsernameAndContentFuzzy(api, results, query.substr(1, p), query.substr(p + 1));
+            pushStickerByUsernameAndContentFuzzy(api, results, query.substr(1, p - 1), query.substr(p + 1));
     }
     else
         pushStickerByContentFuzzy(api, results, query);
