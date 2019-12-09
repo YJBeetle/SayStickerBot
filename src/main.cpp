@@ -206,9 +206,9 @@ int main()
     });
 
     bot.getEvents().onInlineQuery([&bot](InlineQuery::Ptr inlineQuery) {
-        auto &query = inlineQuery->query;
+        LogI("InlineQuery: \n\tfrom: <%s>(%d)\n%s", inlineQuery->from->username.c_str(), inlineQuery->from->id, inlineQuery->query.c_str());
 
-        LogI("InlineQuery: %s: %s", inlineQuery->from->username.c_str(), query.c_str());
+        auto &query = inlineQuery->query;
 
         vector<InlineQueryResult::Ptr> results; // 准备results
 
