@@ -95,7 +95,18 @@ int main()
 
         if (message->chat->type == Chat::Type::Private)
         { // 私聊
-            sendMessage(api, chatId, "请转发消息给我。");
+            stringstream ss;
+            ss << "这里是贴纸语录机器人。" << endl
+               << "与其他的语录机器人类似，这里可以记录您自己或者别人说过的话。" << endl
+               << "然而不同的是，我将会把你转发的消息用Sticker的形式呈现出来。" << endl
+               << endl
+               << "使用我的方法很简单，将您想要保存的消息转发给我即可。" << endl
+               << "当然，和大多数情况一样，如果被转发者的Forwarded privacy设置禁止链接到原用户，那么我将不知道您转发的消息来自于何人，故无法收录，这是Telegram的机制所致。" << endl
+               << endl
+               << "如果需要管理您自己的语录，请给我发送 /list 来列出您已收录的语录。" << endl
+               << "在列出的同时，每一句语录前将会有一个序号，如果您需要删除某一行语录，则给我发送 /delete 加您想删除的语录序号即可。" << endl
+               << "目前想说的就是这么多，祝使用愉快。" << endl;
+            sendMessage(api, chatId, ss.str().c_str());
         } // 不支持群组
     });
 
@@ -179,7 +190,7 @@ int main()
             }
             else
             {
-                sendMessage(api, chatId, "只能管理自己的消息");
+                sendMessage(api, chatId, "您只能管理自己的消息");
             }
         }
         else
