@@ -49,10 +49,9 @@ int main()
                 string &fromUsername = message->forwardFrom->username;
                 int fromUserId = message->forwardFrom->id;
                 string &content = message->text;
-                LogV("Forward message: fromUsername=%s, fromUserId=%d, content=%s",
+                LogV("Forward message: \n\tforwardFrom: <%s>(%d)",
                      fromUsername.c_str(),
-                     fromUserId,
-                     content.c_str());
+                     fromUserId);
 
                 if (fromUserId == botId)
                 {
