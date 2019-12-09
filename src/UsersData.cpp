@@ -33,36 +33,36 @@ UsersData::UsersData(const std::string &dbFile)
     // 预编译一些常用的
     sqlite3_prepare_v2(db, R"(INSERT INTO  "messages" ("fromUserId", "fromUsername", "content", "fileId") VALUES (?, ?, ?, ?);)", -1, &stmtAdd, NULL);
     sqlite3_prepare_v2(db, R"(DELETE FROM "messages" WHERE "id" = ?;)", -1, &stmtRemove, NULL);
-    sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("id" = ?) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)",
+    sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("id" = ?) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)", // 删除检查所有者用 其实这里应该只会返回一个
                        -1,
                        &stmtSearchById,
                        NULL);
-    sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUsername" = ? COLLATE NOCASE) ORDER BY "id" ASC;)", // 按id升序 没有数量限制
+    sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUsername" = ? COLLATE NOCASE) ORDER BY "id" ASC;)", // list用 按id升序 没有数量限制
                        -1,
                        &stmtSearchByUsername,
                        NULL);
     sqlite3_prepare_v2(db,
-                       R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUsername" LIKE ? COLLATE NOCASE) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)",
+                       R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUsername" LIKE ? COLLATE NOCASE) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)", // inline用 限制20个
                        -1,
                        &stmtSearchByUsernameFuzzy,
                        NULL);
     sqlite3_prepare_v2(db,
-                       R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUsername" = ? COLLATE NOCASE) AND ("content" LIKE ? COLLATE NOCASE) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)",
+                       R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUsername" = ? COLLATE NOCASE) AND ("content" LIKE ? COLLATE NOCASE) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)", // inline用 限制20个
                        -1,
                        &stmtSearchByUsernameAndContentFuzzy,
                        NULL);
     sqlite3_prepare_v2(db,
-                       R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUserId" = ?) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)",
+                       R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUserId" = ?) ORDER BY "id" ASC;)", // list用 按id升序 没有数量限制
                        -1,
                        &stmtSearchByUserId,
                        NULL);
     sqlite3_prepare_v2(db,
-                       R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUserId" = ?) AND ("content" = ?) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)",
+                       R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUserId" = ?) AND ("content" = ?) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)", // 检查重复用 其实这里应该只会返回一个
                        -1,
                        &stmtSearchByUserIdAndContent,
                        NULL);
     sqlite3_prepare_v2(db,
-                       R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("content" LIKE ? COLLATE NOCASE) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)",
+                       R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("content" LIKE ? COLLATE NOCASE) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)", // inline用 限制20个
                        -1,
                        &stmtSearchByContentFuzzy,
                        NULL);
