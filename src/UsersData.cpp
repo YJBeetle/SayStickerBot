@@ -37,7 +37,7 @@ UsersData::UsersData(const std::string &dbFile)
                        -1,
                        &stmtSearchById,
                        NULL);
-    sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUsername" = ? COLLATE NOCASE) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)",
+    sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("fromUsername" = ? COLLATE NOCASE) ORDER BY "id" ASC;)", // 按id升序 没有数量限制
                        -1,
                        &stmtSearchByUsername,
                        NULL);
