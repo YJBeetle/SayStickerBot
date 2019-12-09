@@ -188,6 +188,13 @@ int main()
         }
     });
 
+    bot.getEvents().onCommand("updateall", [&bot](Message::Ptr message) { // /updateall
+        auto &api = bot.getApi();
+        auto chatId = message->chat->id;
+
+        // TODO:此命令更新本用户的全部贴图 重新上传 更新头像
+    });
+
     bot.getEvents().onUnknownCommand([&bot](Message::Ptr message) { // 未知指令
         auto &api = bot.getApi();
         auto chatId = message->chat->id;
