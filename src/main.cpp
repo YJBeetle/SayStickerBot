@@ -60,6 +60,12 @@ int main()
                     return;
                 }
 
+                if (content.empty())
+                {
+                    sendMessage(api, chatId, "大概是不支持的内容呢。"); // 空消息判断
+                    return;
+                }
+
                 auto ret = usersData->searchByUserIdAndContent(fromUserId, content); // 搜索是否已经存在
                 if (ret.size() == 0)
                 { // 不存在
