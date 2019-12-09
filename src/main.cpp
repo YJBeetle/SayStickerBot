@@ -115,7 +115,7 @@ int main()
                << "另外需要提醒一点的是，不是每个人都愿意自己的语录在自己不知情的情况下被收录，所以虽然在这里没有任何的限制，但是请在转发消息给我之前得到原消息人的同意/默许。" << endl
                << endl
                << "目前想说的就是这么多，祝使用愉快。" << endl;
-            sendMessage(api, chatId, ss.str().c_str());
+            sendMessage(api, chatId, ss.str());
         } // 不支持群组
     });
 
