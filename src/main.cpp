@@ -103,7 +103,7 @@ int main()
         auto &api = bot.getApi();
         auto chatId = message->chat->id;
 
-        sendMessage(api, chatId, "欢迎使用贴纸语录机器人。");
+        sendMessage(api, chatId, "欢迎使用贴纸语录机器人。\n如果想要什么帮助的话请给我发 /help");
     });
 
     bot.getEvents().onCommand("list", [&bot](Message::Ptr message) { // /list
