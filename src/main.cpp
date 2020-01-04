@@ -181,24 +181,38 @@ int main()
 
         if (StringTools::startsWith(command, "/delete ")) // "/delete <id>"
         {
-            int id = std::stoi(command.substr(8));
-            auto ret = usersData->searchById(id);
-            if (ret.size() && ret[0].fromUserId == message->from->id)
+            int id = 0;
+
+            try
             {
-                usersData->remove(id);
-                try
-                {
-                    api.deleteStickerFromSet(ret[0].fileId); // 从tg服务器删除
-                }
-                catch (TgException &e)
-                {
-                    LogE("TgBot::Api::deleteStickerFromSet: %s", e.what());
-                }
-                sendMessage(api, chatId, "已删除");
+                id = std::stoi(command.substr(8));
             }
-            else
+            catch (const std::exception &e)
             {
-                sendMessage(api, chatId, "您只能管理自己的消息");
+                LogE("TgBot::Api::deleteStickerFromSet: %s", e.what());
+                sendMessage(api, chatId, "id必须为数字");
+            }
+
+            if (id)
+            {
+                auto ret = usersData->searchById(id);
+                if (ret.size() && ret[0].fromUserId == message->from->id)
+                {
+                    usersData->remove(id);
+                    try
+                    {
+                        api.deleteStickerFromSet(ret[0].fileId); // 从tg服务器删除
+                    }
+                    catch (TgException &e)
+                    {
+                        LogE("TgBot::Api::deleteStickerFromSet: %s", e.what());
+                    }
+                    sendMessage(api, chatId, "已删除");
+                }
+                else
+                {
+                    sendMessage(api, chatId, "您只能管理自己的消息");
+                }
             }
         }
         else
