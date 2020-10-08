@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <memory>
 
 #include "Log.h"
 #include "Global.h"
@@ -13,7 +14,7 @@ using namespace cv;
 using namespace TgBot;
 
 // ArtRobot的实际绘制函数
-std::tuple<shared_ptr<ArtRobot::Component::Base>, double, double>
+std::tuple<unique_ptr<ArtRobot::Component::Base>, double, double>
 drawImage(const string &__userPhotoData, const string &__name, const string &__content)
 {
     // 首先创建文字，因为需要计算其中宽高
@@ -45,7 +46,7 @@ drawImage(const string &__userPhotoData, const string &__name, const string &__c
 
     cout << ws << " " << hs << endl;
 
-    auto body = make_shared<ArtRobot::Component::Group>("body"); // body
+    auto body = make_unique<ArtRobot::Component::Group>("body"); // body
 
     auto bg = make_shared<ArtRobot::Component::Rectangle>("bg", 0, 0, 512 - ws, 512 - hs, 0, "79B3E2"); // bg
     body->addChild(bg);
@@ -87,7 +88,7 @@ drawImage(const string &__userPhotoData, const string &__name, const string &__c
     double realWidth = 512 - ws,
            realHeight = 512 - hs;
 
-    return {body, realWidth, realHeight};
+    return {move(body), realWidth, realHeight};
 }
 
 string MakeSticker(const Api &api, int64_t chatId,
