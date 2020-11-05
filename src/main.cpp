@@ -183,7 +183,7 @@ int main()
 
         usersData->removeByUserId(userId);
         if (usersData->searchOptOutByUserIdOrUsername(userId, username)) {
-            usersData->optOutByUserId(userId);
+            usersData->optOutByUserIdAndUsername(userId, username);
             sendMessage(api, chatId, "已经进行过 OptOut 操作");
             return;
         }

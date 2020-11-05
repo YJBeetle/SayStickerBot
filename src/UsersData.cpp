@@ -276,7 +276,7 @@ bool UsersData::searchOptOutByUserIdOrUsername(int userId, const std::string &us
     return false;
 }
 
-void UsersData::optOutByUserId(int userId, const std::string &username)
+void UsersData::optOutByUserIdAndUsername(int userId, const std::string &username)
 {
     sqlite3_bind_int(stmtOptOutByUserId, 1, userId);
     sqlite3_bind_int(stmtOptOutByUserId, 2, 1);
