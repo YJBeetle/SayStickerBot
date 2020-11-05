@@ -21,18 +21,30 @@ UsersData::UsersData(const std::string &dbFile)
     // 初始化表
     // DROP TABLE "messages"; // 删表
     sqlite3_stmt *stmt;
-    sqlite3_prepare_v2(db, R"(CREATE TABLE "messages" ("id" integer, "fromUserId" integer, "fromUsername" text, "content" text, "fileId" text, PRIMARY KEY (id));)", -1, &stmt, NULL);
+    sqlite3_prepare_v2(db, R"(CREATE TABLE IF NOT EXISTS "messages" ("id" integer, "fromUserId" integer, "fromUsername" text, "content" text, "fileId" text, PRIMARY KEY (id));)", -1, &stmt, NULL);
+    sqlite3_stmt *stmtCreateUserOption;
+    sqlite3_prepare_v2(db, R"(CREATE TABLE IF NOT EXISTS "options" ("fromUserId" integer, "optout" integer, PRIMARY KEY (fromUserId));)", -1, &stmtCreateUserOption, NULL);
     rc = sqlite3_step(stmt);
     if (rc == SQLITE_ERROR)
     {
         sqlite3_close(db);
-        throw runtime_error("Create table error");
+        throw runtime_error("Create message table error");
+    }
+    sqlite3_finalize(stmt);
+    rc = sqlite3_step(stmtCreateUserOption);
+    if (rc == SQLITE_ERROR)
+    {
+        sqlite3_close(db);
+        throw runtime_error("Create options table error");
     }
     sqlite3_finalize(stmt);
 
     // 预编译一些常用的
-    sqlite3_prepare_v2(db, R"(INSERT INTO  "messages" ("fromUserId", "fromUsername", "content", "fileId") VALUES (?, ?, ?, ?);)", -1, &stmtAdd, NULL);
+    sqlite3_prepare_v2(db, R"(INSERT INTO "messages" ("fromUserId", "fromUsername", "content", "fileId") VALUES (?, ?, ?, ?);)", -1, &stmtAdd, NULL);
     sqlite3_prepare_v2(db, R"(DELETE FROM "messages" WHERE "id" = ?;)", -1, &stmtRemove, NULL);
+    sqlite3_prepare_v2(db, R"(DELETE FROM "messages" WHERE "fromUserId" = ?;)", -1, &stmtRemoveByUserId, NULL);
+    sqlite3_prepare_v2(db, R"(INSERT INTO "options" ("fromUserId", "optout") VALUES(?, ?);)", -1, &stmtOptOutByUserId, NULL);
+    sqlite3_prepare_v2(db, R"(SELECT "fromUserId", "optout" WHERE ("fromUserId" = ?) AND ("optout" = 1);)", -1, &stmtSearchOptOutByUserId, NULL);
     sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("id" = ?) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)", // 删除检查所有者用 其实这里应该只会返回一个
                        -1,
                        &stmtSearchById,
@@ -247,4 +259,30 @@ vector<UsersData::Column> UsersData::searchByContentFuzzy(const string &contentK
     sqlite3_reset(stmtSearchByContentFuzzy);
 
     return ret;
+}
+
+bool UsersData::searchOptOutByUserId(int userId)
+{
+    sqlite3_bind_int(stmtSearchOptOutByUserId, 1, userId);
+    sqlite3_bind_int(stmtSearchOptOutByUserId, 2, 1);
+    while (sqlite3_step(stmtSearchOptOutByUserId) == SQLITE_ROW) {
+        sqlite3_reset(stmtSearchOptOutByUserId);
+        return true;
+    }
+    sqlite3_reset(stmtSearchOptOutByUserId);
+    return false;
+}
+
+void UsersData::optOutByUserId(int userId)
+{
+    sqlite3_bind_int(stmtOptOutByUserId, 1, userId);
+    sqlite3_step(stmtOptOutByUserId);
+    sqlite3_reset(stmtOptOutByUserId);
+}
+
+void UsersData::removeByUserId(int userId)
+{
+    sqlite3_bind_int(stmtRemoveByUserId, 1, userId);
+    sqlite3_step(stmtRemoveByUserId);
+    sqlite3_reset(stmtRemoveByUserId);
 }
