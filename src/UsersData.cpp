@@ -272,7 +272,7 @@ bool UsersData::searchOptOutByUserIdOrUsername(int userId, const std::string &us
         sqlite3_reset(stmtSearchOptOutByUserIdOrUsername);
         return true;
     }
-    sqlite3_reset(stmtSearchOptOutByUserId);
+    sqlite3_reset(stmtSearchOptOutByUserIdOrUsername);
     return false;
 }
 
