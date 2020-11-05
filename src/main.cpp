@@ -185,12 +185,12 @@ int main()
         }
 
         usersData->removeByUserId(userId);
-        if (usersData->searchOptOutByUserIdOrUsername(userId, username)) {
+        if (!(usersData->searchOptOutByUserIdOrUsername(userId, username))) {
             usersData->optOutByUserIdAndUsername(userId, username);
-            sendMessage(api, chatId, "已经进行过 OptOut 操作");
+            sendMessage(api, chatId, "OptOut 操作完成");
             return;
         }
-        sendMessage(api, chatId, "OptOut 操作完成");
+        sendMessage(api, chatId, "已经进行过 OptOut 操作");
     });
     bot.getEvents().onCommand("list", [&bot](Message::Ptr message) { // /list
         auto &api = bot.getApi();

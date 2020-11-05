@@ -282,7 +282,6 @@ void UsersData::optOutByUserIdAndUsername(int userId, const std::string &usernam
     sqlite3_bind_int(stmtOptOutByUserIdAndUsername, 2, 1);
     sqlite3_bind_text(stmtOptOutByUserIdAndUsername, 3, username.c_str(), -1, SQLITE_STATIC);
     int rc = sqlite3_step(stmtOptOutByUserIdAndUsername);
-    std::cout << rc << std::endl;
     if (SQLITE_DONE != rc)
     {
         // throw runtime_error("add error");
