@@ -37,7 +37,7 @@ UsersData::UsersData(const std::string &dbFile)
         sqlite3_close(db);
         throw runtime_error("Create options table error");
     }
-    sqlite3_finalize(stmt);
+    sqlite3_finalize(stmtCreateUserOption);
 
     // 预编译一些常用的
     sqlite3_prepare_v2(db, R"(INSERT INTO "messages" ("fromUserId", "fromUsername", "content", "fileId") VALUES (?, ?, ?, ?);)", -1, &stmtAdd, NULL);
