@@ -142,23 +142,34 @@ int main()
         auto chatId = message->chat->id;
         auto userId = message->from->id;
         sendMessage(api, chatId, "正在执行 OptOut 操作，此操作时间可能较长，请稍后...");
-        auto stickerSet = usersData->searchByUserId(userId);
-        for (auto & sticker : stickerSet) {
-            try
-            {
-                api.deleteStickerFromSet(sticker.fileId); // 从tg服务器删除
-            }
-            catch (TgException &e)
-            {
-                LogE("TgBot::Api::deleteStickerFromSet: %s", e.what());
-            }
-            std::this_thread::sleep_for(chrono::seconds(1)); //等待 避免 TG Rate Limit
-        }
 
+        StickerSet::Ptr stickerSet;
+        try
+        {
+            stickerSet = api.getStickerSet(stickerName); // 尝试获取贴纸包
+        }
+        catch (TgException &e)
+        {
+            LogI("throwByImage: TgBot::Api::getStickerSet: %s", e.what());
+            LogI("throwByImage: No sticker, create it.");
+        }
+        if (stickerSet) {
+            for (auto sticker : stickerSet->stickers) {
+                try
+                {
+                    api.deleteStickerFromSet(sticker->fileId); // 从tg服务器删除
+                }
+                catch (TgException &e)
+                {
+                    LogE("TgBot::Api::deleteStickerFromSet: %s", e.what());
+                }
+                std::this_thread::sleep_for(chrono::seconds(1)); //等待 避免 TG Rate Limit
+            }
+        }
         usersData->removeByUserId(userId);
         if (usersData->searchOptOutByUserId(userId)) {
             usersData->optOutByUserId(userId);
-            sendMessage(api, chatId, "已经进行过 Optout 操作");
+            sendMessage(api, chatId, "已经进行过 OptOut 操作");
             return;
         }
         sendMessage(api, chatId, "OptOut 操作完成");

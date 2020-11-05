@@ -91,6 +91,9 @@ UsersData::~UsersData()
     sqlite3_finalize(stmtSearchByUserId);
     sqlite3_finalize(stmtSearchByUserIdAndContent);
     sqlite3_finalize(stmtSearchByContentFuzzy);
+    sqlite3_finalize(stmtRemoveByUserId);
+    sqlite3_finalize(stmtOptOutByUserId);
+    sqlite3_finalize(stmtSearchOptOutByUserId);
     sqlite3_close(db);
 }
 
@@ -264,7 +267,6 @@ vector<UsersData::Column> UsersData::searchByContentFuzzy(const string &contentK
 bool UsersData::searchOptOutByUserId(int userId)
 {
     sqlite3_bind_int(stmtSearchOptOutByUserId, 1, userId);
-    sqlite3_bind_int(stmtSearchOptOutByUserId, 2, 1);
     while (sqlite3_step(stmtSearchOptOutByUserId) == SQLITE_ROW) {
         sqlite3_reset(stmtSearchOptOutByUserId);
         return true;
@@ -276,7 +278,12 @@ bool UsersData::searchOptOutByUserId(int userId)
 void UsersData::optOutByUserId(int userId)
 {
     sqlite3_bind_int(stmtOptOutByUserId, 1, userId);
-    sqlite3_step(stmtOptOutByUserId);
+    sqlite3_bind_int(stmtOptOutByUserId, 2, 1);
+    int rc = sqlite3_step(stmtOptOutByUserId);
+    if (SQLITE_DONE != rc)
+    {
+        // throw runtime_error("add error");
+    }
     sqlite3_reset(stmtOptOutByUserId);
 }
 
