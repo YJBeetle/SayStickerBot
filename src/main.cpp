@@ -137,7 +137,7 @@ int main()
 
         sendMessage(api, chatId, "欢迎使用贴纸语录机器人。\n如果想要什么帮助的话请给我发 /help");
     });
-    bot.getEvents().onCommand("optout_yes_i_know_this_is_one_way_action", [&bot](Message:Ptr message) {
+    bot.getEvents().onCommand("optout_yes_i_know_this_is_one_way_action", [&bot](Message::Ptr message) {
         auto &api = bot.getApi();
         auto chatId = message->chat->id;
         sendMessage(api, chatId, "正在执行 OptOut 操作，此操作时间可能较长，请稍后...");
@@ -158,7 +158,7 @@ int main()
         if (usersData->searchOptOutByUserId(userId)) {
             usersData->optOutByUserId(userId);
             sendMessage(api, chatId, "已经进行过 Optout 操作");
-            return
+            return;
         }
         sendMessage(api, chatId, "OptOut 操作完成");
     });
