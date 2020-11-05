@@ -44,7 +44,7 @@ UsersData::UsersData(const std::string &dbFile)
     sqlite3_prepare_v2(db, R"(DELETE FROM "messages" WHERE "id" = ?;)", -1, &stmtRemove, NULL);
     sqlite3_prepare_v2(db, R"(DELETE FROM "messages" WHERE "fromUserId" = ?;)", -1, &stmtRemoveByUserId, NULL);
     rc = sqlite3_prepare_v2(db, R"(INSERT INTO "options" ("fromUserId", "optout", "fromUsername") VALUES (?, ?, ?);)", -1, &stmtOptOutByUserIdAndUsername, NULL);
-    std:: cout << rc << rc != SQLITE_DONE << endl;
+    std:: cout << rc << (rc != SQLITE_DONE) << endl;
     sqlite3_prepare_v2(db, R"(SELECT "fromUserId", "optout" FROM "options" WHERE (("fromUserId" = ?) OR ("fromUsername" = ?)) AND ("optout" = 1);)", -1, &stmtSearchOptOutByUserIdOrUsername, NULL);
     sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("id" = ?) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)", // 删除检查所有者用 其实这里应该只会返回一个
                        -1,
