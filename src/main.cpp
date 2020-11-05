@@ -199,8 +199,7 @@ int main()
         auto userId = message->from->id;
         auto username = message->from->username;
         if(usersData->searchOptOutByUserIdOrUsername(userId, username)) {
-            sendMessage(api, chatId, "您已经停用此 Bot 的所有能力！");
-            return;
+            sendMessage(api, chatId, "注意：您已经停用此 Bot 的所有能力！如果下方有内容说明出现了 Bug 请联系开发者。");
         }
 
         auto &command = message->text;
