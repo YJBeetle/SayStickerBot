@@ -23,7 +23,7 @@ UsersData::UsersData(const std::string &dbFile)
     sqlite3_stmt *stmt;
     sqlite3_prepare_v2(db, R"(CREATE TABLE IF NOT EXISTS "messages" ("id" integer, "fromUserId" integer, "fromUsername" text, "content" text, "fileId" text, PRIMARY KEY (id));)", -1, &stmt, NULL);
     sqlite3_stmt *stmtCreateUserOption;
-    sqlite3_prepare_v2(db, R"(CREATE TABLE IF NOT EXISTS "options" ("fromUserId" integer, "optout" integer, "fromUsername" text, PRIMARY KEY (fromUserId));)", -1, &stmtCreateUserOption, NULL);
+    sqlite3_prepare_v2(db, R"(CREATE TABLE IF NOT EXISTS "options" ("id" integer, "fromUserId" integer, "optout" integer, "fromUsername" text, PRIMARY KEY (id));)", -1, &stmtCreateUserOption, NULL);
     rc = sqlite3_step(stmt);
     if (rc == SQLITE_ERROR)
     {
@@ -43,8 +43,8 @@ UsersData::UsersData(const std::string &dbFile)
     sqlite3_prepare_v2(db, R"(INSERT INTO "messages" ("fromUserId", "fromUsername", "content", "fileId") VALUES (?, ?, ?, ?);)", -1, &stmtAdd, NULL);
     sqlite3_prepare_v2(db, R"(DELETE FROM "messages" WHERE "id" = ?;)", -1, &stmtRemove, NULL);
     sqlite3_prepare_v2(db, R"(DELETE FROM "messages" WHERE "fromUserId" = ?;)", -1, &stmtRemoveByUserId, NULL);
-    sqlite3_prepare_v2(db, R"(INSERT INTO "options" ("fromUserId", "optout", "fromUsername") VALUES(?, ?, ?);)", -1, &stmtOptOutByUserId, NULL);
-    sqlite3_prepare_v2(db, R"(SELECT "fromUserId", "optout" FROM "options" WHERE (("fromUserId" = ?) OR ("fromUsername" = ?)) AND ("optout" = 1);)", -1, &stmtSearchOptOutByUserId, NULL);
+    sqlite3_prepare_v2(db, R"(INSERT INTO "options" ("fromUserId", "optout", "fromUsername") VALUES(?, ?, ?);)", -1, &stmtOptOutByUserIdAndUsername, NULL);
+    sqlite3_prepare_v2(db, R"(SELECT "fromUserId", "optout" FROM "options" WHERE (("fromUserId" = ?) OR ("fromUsername" = ?)) AND ("optout" = 1);)", -1, &stmtSearchOptOutByUserIdOrUsername, NULL);
     sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("id" = ?) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)", // 删除检查所有者用 其实这里应该只会返回一个
                        -1,
                        &stmtSearchById,
@@ -92,8 +92,8 @@ UsersData::~UsersData()
     sqlite3_finalize(stmtSearchByUserIdAndContent);
     sqlite3_finalize(stmtSearchByContentFuzzy);
     sqlite3_finalize(stmtRemoveByUserId);
-    sqlite3_finalize(stmtOptOutByUserId);
-    sqlite3_finalize(stmtSearchOptOutByUserId);
+    sqlite3_finalize(stmtOptOutByUserIdAndUsername);
+    sqlite3_finalize(stmtSearchOptOutByUserIdOrUsername);
     sqlite3_close(db);
 }
 
@@ -266,10 +266,10 @@ vector<UsersData::Column> UsersData::searchByContentFuzzy(const string &contentK
 
 bool UsersData::searchOptOutByUserIdOrUsername(int userId, const std::string &username)
 {
-    sqlite3_bind_int(stmtSearchOptOutByUserId, 1, userId);
-    sqlite3_bind_text(stmtSearchOptOutByUserId, 2, username.c_str(), -1, SQLITE_STATIC);
-    while (sqlite3_step(stmtSearchOptOutByUserId) == SQLITE_ROW) {
-        sqlite3_reset(stmtSearchOptOutByUserId);
+    sqlite3_bind_int(stmtSearchOptOutByUserIdOrUsername, 1, userId);
+    sqlite3_bind_text(stmtSearchOptOutByUserIdOrUsername, 2, username.c_str(), -1, SQLITE_STATIC);
+    while (sqlite3_step(stmtSearchOptOutByUserIdOrUsername) == SQLITE_ROW) {
+        sqlite3_reset(stmtSearchOptOutByUserIdOrUsername);
         return true;
     }
     sqlite3_reset(stmtSearchOptOutByUserId);
@@ -278,15 +278,15 @@ bool UsersData::searchOptOutByUserIdOrUsername(int userId, const std::string &us
 
 void UsersData::optOutByUserIdAndUsername(int userId, const std::string &username)
 {
-    sqlite3_bind_int(stmtOptOutByUserId, 1, userId);
-    sqlite3_bind_int(stmtOptOutByUserId, 2, 1);
-    sqlite3_bind_text(stmtOptOutByUserId, 3, username.c_str(), -1, SQLITE_STATIC);
-    int rc = sqlite3_step(stmtOptOutByUserId);
+    sqlite3_bind_int(stmtOptOutByUserIdAndUsername, 1, userId);
+    sqlite3_bind_int(stmtOptOutByUserIdAndUsername, 2, 1);
+    sqlite3_bind_text(stmtOptOutByUserIdAndUsername, 3, username.c_str(), -1, SQLITE_STATIC);
+    int rc = sqlite3_step(stmtOptOutByUserIdAndUsername);
     if (SQLITE_DONE != rc)
     {
         // throw runtime_error("add error");
     }
-    sqlite3_reset(stmtOptOutByUserId);
+    sqlite3_reset(stmtOptOutByUserIdAndUsername);
 }
 
 void UsersData::removeByUserId(int userId)

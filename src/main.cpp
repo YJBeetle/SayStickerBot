@@ -126,6 +126,7 @@ int main()
                << "在列出的同时，每一句语录前将会有一个序号，如果您需要删除某一行语录，则给我发送 /delete 加您想删除的语录序号即可。" << endl
                << endl
                << "另外需要提醒一点的是，不是每个人都愿意自己的语录在自己不知情的情况下被收录，所以虽然在这里没有任何的限制，但是请在转发消息给我之前得到原消息人的同意/默许。" << endl
+               << "如果您想停用此 Bot 的所有能力，请给我发送 /optout_yes_i_know_this_is_one_way_action ，此操作会删除所有关于您的数据并禁止任何人使用此 Bot 添加您的记录。此操作是单向的，您不能再启动此 Bot 的能力。" << endl
                << endl
                << "目前想说的就是这么多，祝使用愉快。" << endl;
             sendMessage(api, chatId, ss.str());
@@ -145,6 +146,20 @@ int main()
         auto username = message->from->username;
         sendMessage(api, chatId, "正在执行 OptOut 操作，此操作时间可能较长，请稍后...");
         string stickerName = getStickerName(username); // 贴纸名字
+
+        auto stickerSetDB = usersData->searchByUserId(userId);
+        for (auto & sticker: stickerSetDB) {
+            try
+            {
+                api.deleteStickerFromSet(sticker.fileId); // 从tg服务器删除
+            }
+            catch (TgException &e)
+            {
+                LogE("TgBot::Api::deleteStickerFromSet: %s", e.what());
+            }
+            std::this_thread::sleep_for(chrono::seconds(1)); //等待 避免 TG Rate Limit
+        }
+
         StickerSet::Ptr stickerSet;
         try
         {
@@ -167,18 +182,6 @@ int main()
                 }
                 std::this_thread::sleep_for(chrono::seconds(1)); //等待 避免 TG Rate Limit
             }
-        }
-        auto stickerSetDB = usersData->searchByUserId(userId);
-        for (auto & sticker: stickerSetDB) {
-            try
-            {
-                api.deleteStickerFromSet(sticker.fileId); // 从tg服务器删除
-            }
-            catch (TgException &e)
-            {
-                LogE("TgBot::Api::deleteStickerFromSet: %s", e.what());
-            }
-            std::this_thread::sleep_for(chrono::seconds(1)); //等待 避免 TG Rate Limit
         }
 
         usersData->removeByUserId(userId);

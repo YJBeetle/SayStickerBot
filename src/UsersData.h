@@ -22,8 +22,8 @@ private:
     sqlite3_stmt *stmtSearchByUserIdAndContent;
     sqlite3_stmt *stmtSearchByContentFuzzy;
     sqlite3_stmt *stmtRemoveByUserId;
-    sqlite3_stmt *stmtOptOutByUserId;
-    sqlite3_stmt *stmtSearchOptOutByUserId;
+    sqlite3_stmt *stmtOptOutByUserIdAndUsername;
+    sqlite3_stmt *stmtSearchOptOutByUserIdOrUsername;
 
 public:
     struct Column
