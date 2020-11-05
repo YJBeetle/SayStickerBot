@@ -264,7 +264,7 @@ vector<UsersData::Column> UsersData::searchByContentFuzzy(const string &contentK
     return ret;
 }
 
-bool UsersData::searchOptOutByUserIdOrUsername(int userId, const string &username)
+bool UsersData::searchOptOutByUserIdOrUsername(int userId, const std::string &username)
 {
     sqlite3_bind_int(stmtSearchOptOutByUserId, 1, userId);
     sqlite3_bind_int(stmtSearchOptOutByUserId, 2, username);
@@ -276,7 +276,7 @@ bool UsersData::searchOptOutByUserIdOrUsername(int userId, const string &usernam
     return false;
 }
 
-void UsersData::optOutByUserId(int userId, const string &username)
+void UsersData::optOutByUserId(int userId, const std::string &username)
 {
     sqlite3_bind_int(stmtOptOutByUserId, 1, userId);
     sqlite3_bind_int(stmtOptOutByUserId, 2, 1);
