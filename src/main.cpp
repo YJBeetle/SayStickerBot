@@ -167,6 +167,19 @@ int main()
                 std::this_thread::sleep_for(chrono::seconds(1)); //等待 避免 TG Rate Limit
             }
         }
+        auto stickerSetDB = usersData->searchByUserId(userId);
+        for (auto & sticker: stickerSetDB) {
+            try
+            {
+                api.deleteStickerFromSet(sticker.fileId); // 从tg服务器删除
+            }
+            catch (TgException &e)
+            {
+                LogE("TgBot::Api::deleteStickerFromSet: %s", e.what());
+            }
+            std::this_thread::sleep_for(chrono::seconds(1)); //等待 避免 TG Rate Limit
+        }
+
         usersData->removeByUserId(userId);
         if (usersData->searchOptOutByUserId(userId)) {
             usersData->optOutByUserId(userId);
