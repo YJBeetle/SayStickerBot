@@ -55,7 +55,7 @@ int main()
                      fromUsername.c_str(),
                      fromUserId);
 
-                if(usersData->searchOptOutByUserId(fromUserId)) {
+                if(usersData->searchOptOutByUserIdOrUsername(fromUserId, fromUsername)) {
                     sendMessage(api, chatId, "此用户已停用 Bot 能力！"); //OptOut 用户
                     return;
                 }
@@ -106,7 +106,8 @@ int main()
         auto chatId = message->chat->id;
 
         auto userId = message->from->id;
-        if(usersData->searchOptOutByUserId(userId)) {
+        auto username = message->from->username;
+        if(usersData->searchOptOutByUserIdOrUsername(userId, username)) {
             sendMessage(api, chatId, "您已经停用此 Bot 的所有能力！");
             return;
         }
@@ -181,7 +182,7 @@ int main()
         }
 
         usersData->removeByUserId(userId);
-        if (usersData->searchOptOutByUserId(userId)) {
+        if (usersData->searchOptOutByUserIdOrUsername(userId, username)) {
             usersData->optOutByUserId(userId);
             sendMessage(api, chatId, "已经进行过 OptOut 操作");
             return;
@@ -193,7 +194,8 @@ int main()
         auto chatId = message->chat->id;
 
         auto userId = message->from->id;
-        if(usersData->searchOptOutByUserId(userId)) {
+        auto username = message->from->username;
+        if(usersData->searchOptOutByUserIdOrUsername(userId, username)) {
             sendMessage(api, chatId, "您已经停用此 Bot 的所有能力！");
             return;
         }
@@ -247,7 +249,8 @@ int main()
         auto chatId = message->chat->id;
 
         auto userId = message->from->id;
-        if(usersData->searchOptOutByUserId(userId)) {
+        auto username = message->from->username;
+        if(usersData->searchOptOutByUserIdOrUsername(userId, username)) {
             sendMessage(api, chatId, "您已经停用此 Bot 的所有能力！");
             return;
         }
@@ -301,7 +304,8 @@ int main()
         auto chatId = message->chat->id;
         auto userId = message->from->id;
 
-        if(usersData->searchOptOutByUserId(userId)) {
+        auto username = message->from->username;
+        if(usersData->searchOptOutByUserIdOrUsername(userId, username)) {
             sendMessage(api, chatId, "您已经停用此 Bot 的所有能力！");
             return;
         }
@@ -313,7 +317,8 @@ int main()
         auto chatId = message->chat->id;
 
         auto userId = message->from->id;
-        if(usersData->searchOptOutByUserId(userId)) {
+        auto username = message->from->username;
+        if(usersData->searchOptOutByUserIdOrUsername(userId, username)) {
             sendMessage(api, chatId, "您已经停用此 Bot 的所有能力！");
             return;
         }

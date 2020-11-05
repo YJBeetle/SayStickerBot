@@ -23,7 +23,7 @@ UsersData::UsersData(const std::string &dbFile)
     sqlite3_stmt *stmt;
     sqlite3_prepare_v2(db, R"(CREATE TABLE IF NOT EXISTS "messages" ("id" integer, "fromUserId" integer, "fromUsername" text, "content" text, "fileId" text, PRIMARY KEY (id));)", -1, &stmt, NULL);
     sqlite3_stmt *stmtCreateUserOption;
-    sqlite3_prepare_v2(db, R"(CREATE TABLE IF NOT EXISTS "options" ("fromUserId" integer, "optout" integer, PRIMARY KEY (fromUserId));)", -1, &stmtCreateUserOption, NULL);
+    sqlite3_prepare_v2(db, R"(CREATE TABLE IF NOT EXISTS "options" ("fromUserId" integer, "optout" integer, "fromUsername" text, PRIMARY KEY (fromUserId));)", -1, &stmtCreateUserOption, NULL);
     rc = sqlite3_step(stmt);
     if (rc == SQLITE_ERROR)
     {
@@ -43,8 +43,8 @@ UsersData::UsersData(const std::string &dbFile)
     sqlite3_prepare_v2(db, R"(INSERT INTO "messages" ("fromUserId", "fromUsername", "content", "fileId") VALUES (?, ?, ?, ?);)", -1, &stmtAdd, NULL);
     sqlite3_prepare_v2(db, R"(DELETE FROM "messages" WHERE "id" = ?;)", -1, &stmtRemove, NULL);
     sqlite3_prepare_v2(db, R"(DELETE FROM "messages" WHERE "fromUserId" = ?;)", -1, &stmtRemoveByUserId, NULL);
-    sqlite3_prepare_v2(db, R"(INSERT INTO "options" ("fromUserId", "optout") VALUES(?, ?);)", -1, &stmtOptOutByUserId, NULL);
-    sqlite3_prepare_v2(db, R"(SELECT "fromUserId", "optout" FROM "options" WHERE ("fromUserId" = ?) AND ("optout" = 1);)", -1, &stmtSearchOptOutByUserId, NULL);
+    sqlite3_prepare_v2(db, R"(INSERT INTO "options" ("fromUserId", "optout", "fromUsername") VALUES(?, ?, ?);)", -1, &stmtOptOutByUserId, NULL);
+    sqlite3_prepare_v2(db, R"(SELECT "fromUserId", "optout" FROM "options" WHERE (("fromUserId" = ?) OR ("fromUsername" = ?)) AND ("optout" = 1);)", -1, &stmtSearchOptOutByUserId, NULL);
     sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("id" = ?) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)", // 删除检查所有者用 其实这里应该只会返回一个
                        -1,
                        &stmtSearchById,
@@ -264,9 +264,10 @@ vector<UsersData::Column> UsersData::searchByContentFuzzy(const string &contentK
     return ret;
 }
 
-bool UsersData::searchOptOutByUserId(int userId)
+bool UsersData::searchOptOutByUserIdOrUsername(int userId, const string &username)
 {
     sqlite3_bind_int(stmtSearchOptOutByUserId, 1, userId);
+    sqlite3_bind_int(stmtSearchOptOutByUserId, 2, username);
     while (sqlite3_step(stmtSearchOptOutByUserId) == SQLITE_ROW) {
         sqlite3_reset(stmtSearchOptOutByUserId);
         return true;
@@ -275,10 +276,11 @@ bool UsersData::searchOptOutByUserId(int userId)
     return false;
 }
 
-void UsersData::optOutByUserId(int userId)
+void UsersData::optOutByUserId(int userId, const string &username)
 {
     sqlite3_bind_int(stmtOptOutByUserId, 1, userId);
     sqlite3_bind_int(stmtOptOutByUserId, 2, 1);
+    sqlite3_bind_int(stmtOptOutByUserId, 3, username);
     int rc = sqlite3_step(stmtOptOutByUserId);
     if (SQLITE_DONE != rc)
     {

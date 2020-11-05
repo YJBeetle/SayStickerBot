@@ -49,6 +49,6 @@ public:
     std::vector<Column> searchByUserIdAndContent(int userId, const std::string &content);
     std::vector<Column> searchByContentFuzzy(const std::string &contentKey);
     void removeByUserId(int userId);
-    void optOutByUserId(int userId);
-    bool searchOptOutByUserId(int userId);
+    void optOutByUserId(int userId, const string &username);
+    bool searchOptOutByUserIdOrUsername(int userId, const string &username);
 };
