@@ -21,6 +21,9 @@ private:
     sqlite3_stmt *stmtSearchByUserId;
     sqlite3_stmt *stmtSearchByUserIdAndContent;
     sqlite3_stmt *stmtSearchByContentFuzzy;
+    sqlite3_stmt *stmtRemoveByUserId;
+    sqlite3_stmt *stmtOptOutByUserIdAndUsername;
+    sqlite3_stmt *stmtSearchOptOutByUserIdOrUsername;
 
 public:
     struct Column
@@ -44,5 +47,8 @@ public:
     std::vector<Column> searchByUsernameAndContentFuzzy(const std::string &username, const std::string &contentKey);
     std::vector<Column> searchByUserId(int userId);
     std::vector<Column> searchByUserIdAndContent(int userId, const std::string &content);
-    std::vector<Column> searchByContentFuzzy( const std::string &contentKey);
+    std::vector<Column> searchByContentFuzzy(const std::string &contentKey);
+    void removeByUserId(int userId);
+    void optOutByUserIdAndUsername(int userId, const std::string &username);
+    bool searchOptOutByUserIdOrUsername(int userId, const std::string &username);
 };

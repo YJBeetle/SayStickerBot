@@ -3,6 +3,8 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
+#include <chrono>
+#include <thread>
 
 #include <opencv2/opencv.hpp>
 #include <tgbot/tgbot.h>
@@ -53,6 +55,11 @@ int main()
                      fromUsername.c_str(),
                      fromUserId);
 
+                if(usersData->searchOptOutByUserIdOrUsername(fromUserId, fromUsername)) {
+                    sendMessage(api, chatId, "此用户已停用 Bot 能力！"); //OptOut 用户
+                    return;
+                }
+
                 if (fromUserId == botId)
                 {
                     sendMessage(api, chatId, "哼～ (┙>∧<)┙彡 ┻━┻"); // 禁止收录自己
@@ -98,6 +105,13 @@ int main()
         auto &api = bot.getApi();
         auto chatId = message->chat->id;
 
+        auto userId = message->from->id;
+        auto username = message->from->username;
+        if(usersData->searchOptOutByUserIdOrUsername(userId, username)) {
+            sendMessage(api, chatId, "您已经停用此 Bot 的所有能力！");
+            return;
+        }
+
         if (message->chat->type == Chat::Type::Private)
         { // 私聊
             stringstream ss;
@@ -111,7 +125,8 @@ int main()
                << "如果需要管理您自己的语录，请给我发送 /list 来列出您已收录的语录。" << endl
                << "在列出的同时，每一句语录前将会有一个序号，如果您需要删除某一行语录，则给我发送 /delete 加您想删除的语录序号即可。" << endl
                << endl
-               << "另外需要提醒一点的是，不是每个人都愿意自己的语录在自己不知情的情况下被收录，所以虽然在这里没有任何的限制，但是请在转发消息给我之前得到原消息人的同意/默许。" << endl
+               << "另外需要提醒一点的是，不是每个人都愿意自己的语录在自己不知情的情况下被收录，请在转发消息给我之前得到原消息人的同意/默许。" << endl
+               << "如果您想停用此 Bot 的所有能力，请给我发送 /optout_yes_i_know_this_is_one_way_action ，此操作会删除所有关于您的数据并禁止任何人使用此 Bot 添加您的记录。此操作是单向的，您不能再启动此 Bot 的能力。" << endl
                << endl
                << "目前想说的就是这么多，祝使用愉快。" << endl;
             sendMessage(api, chatId, ss.str());
@@ -124,10 +139,68 @@ int main()
 
         sendMessage(api, chatId, "欢迎使用贴纸语录机器人。\n如果想要什么帮助的话请给我发 /help");
     });
+    bot.getEvents().onCommand("optout_yes_i_know_this_is_one_way_action", [&bot](Message::Ptr message) {
+        auto &api = bot.getApi();
+        auto chatId = message->chat->id;
+        auto userId = message->from->id;
+        auto username = message->from->username;
+        sendMessage(api, chatId, "正在执行 OptOut 操作，此操作时间可能较长，请稍后...");
+        string stickerName = getStickerName(username); // 贴纸名字
 
+        auto stickerSetDB = usersData->searchByUserId(userId);
+        for (auto & sticker: stickerSetDB) {
+            try
+            {
+                api.deleteStickerFromSet(sticker.fileId); // 从tg服务器删除
+            }
+            catch (TgException &e)
+            {
+                LogE("TgBot::Api::deleteStickerFromSet: %s", e.what());
+            }
+            std::this_thread::sleep_for(chrono::seconds(1)); //等待 避免 TG Rate Limit
+        }
+
+        StickerSet::Ptr stickerSet;
+        try
+        {
+            stickerSet = api.getStickerSet(stickerName); // 尝试获取贴纸包
+        }
+        catch (TgException &e)
+        {
+            LogI("throwByImage: TgBot::Api::getStickerSet: %s", e.what());
+            LogI("throwByImage: No sticker, create it.");
+        }
+        if (stickerSet) {
+            for (auto sticker : stickerSet->stickers) {
+                try
+                {
+                    api.deleteStickerFromSet(sticker->fileId); // 从tg服务器删除
+                }
+                catch (TgException &e)
+                {
+                    LogE("TgBot::Api::deleteStickerFromSet: %s", e.what());
+                }
+                std::this_thread::sleep_for(chrono::seconds(1)); //等待 避免 TG Rate Limit
+            }
+        }
+
+        usersData->removeByUserId(userId);
+        if (!(usersData->searchOptOutByUserIdOrUsername(userId, username))) {
+            usersData->optOutByUserIdAndUsername(userId, username);
+            sendMessage(api, chatId, "OptOut 操作完成");
+            return;
+        }
+        sendMessage(api, chatId, "已经进行过 OptOut 操作");
+    });
     bot.getEvents().onCommand("list", [&bot](Message::Ptr message) { // /list
         auto &api = bot.getApi();
         auto chatId = message->chat->id;
+
+        auto userId = message->from->id;
+        auto username = message->from->username;
+        if(usersData->searchOptOutByUserIdOrUsername(userId, username)) {
+            sendMessage(api, chatId, "注意：您已经停用此 Bot 的所有能力！如果下方有内容说明出现了 Bug 请联系开发者。");
+        }
 
         auto &command = message->text;
 
@@ -177,6 +250,13 @@ int main()
         auto &api = bot.getApi();
         auto chatId = message->chat->id;
 
+        auto userId = message->from->id;
+        auto username = message->from->username;
+        if(usersData->searchOptOutByUserIdOrUsername(userId, username)) {
+            sendMessage(api, chatId, "您已经停用此 Bot 的所有能力！");
+            return;
+        }
+
         auto &command = message->text;
 
         if (StringTools::startsWith(command, "/delete ")) // "/delete <id>"
@@ -224,13 +304,26 @@ int main()
     bot.getEvents().onCommand("updateall", [&bot](Message::Ptr message) { // /updateall
         auto &api = bot.getApi();
         auto chatId = message->chat->id;
+        auto userId = message->from->id;
 
+        auto username = message->from->username;
+        if(usersData->searchOptOutByUserIdOrUsername(userId, username)) {
+            sendMessage(api, chatId, "您已经停用此 Bot 的所有能力！");
+            return;
+        }
         // TODO:此命令更新本用户的全部贴图 重新上传 更新头像
     });
 
     bot.getEvents().onUnknownCommand([&bot](Message::Ptr message) { // 未知指令
         auto &api = bot.getApi();
         auto chatId = message->chat->id;
+
+        auto userId = message->from->id;
+        auto username = message->from->username;
+        if(usersData->searchOptOutByUserIdOrUsername(userId, username)) {
+            sendMessage(api, chatId, "您已经停用此 Bot 的所有能力！");
+            return;
+        }
 
         if (message->chat->type == Chat::Type::Private)
         { // 私聊
