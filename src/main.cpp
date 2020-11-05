@@ -140,9 +140,10 @@ int main()
     bot.getEvents().onCommand("optout_yes_i_know_this_is_one_way_action", [&bot](Message::Ptr message) {
         auto &api = bot.getApi();
         auto chatId = message->chat->id;
+        auto userId = message->from->id;
         sendMessage(api, chatId, "正在执行 OptOut 操作，此操作时间可能较长，请稍后...");
         auto stickerSet = usersData->searchByUserId(userId);
-        for (auto sticker: stickerSet) {
+        for (auto & sticker : stickerSet) {
             try
             {
                 api.deleteStickerFromSet(sticker.fileId); // 从tg服务器删除
