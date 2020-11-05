@@ -43,7 +43,7 @@ UsersData::UsersData(const std::string &dbFile)
     sqlite3_prepare_v2(db, R"(INSERT INTO "messages" ("fromUserId", "fromUsername", "content", "fileId") VALUES (?, ?, ?, ?);)", -1, &stmtAdd, NULL);
     sqlite3_prepare_v2(db, R"(DELETE FROM "messages" WHERE "id" = ?;)", -1, &stmtRemove, NULL);
     sqlite3_prepare_v2(db, R"(DELETE FROM "messages" WHERE "fromUserId" = ?;)", -1, &stmtRemoveByUserId, NULL);
-    sqlite3_prepare_v2(db, R"(INSERT INTO "options" ("fromUserId", "optout", "fromUsername") VALUES(?, ?, ?);)", -1, &stmtOptOutByUserIdAndUsername, NULL);
+    sqlite3_prepare_v2(db, R"(INSERT INTO "options" ("fromUserId", "optout", "fromUsername") VALUES (?, ?, ?);)", -1, &stmtOptOutByUserIdAndUsername, NULL);
     sqlite3_prepare_v2(db, R"(SELECT "fromUserId", "optout" FROM "options" WHERE (("fromUserId" = ?) OR ("fromUsername" = ?)) AND ("optout" = 1);)", -1, &stmtSearchOptOutByUserIdOrUsername, NULL);
     sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("id" = ?) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)", // 删除检查所有者用 其实这里应该只会返回一个
                        -1,
@@ -284,7 +284,7 @@ void UsersData::optOutByUserIdAndUsername(int userId, const std::string &usernam
     int rc = sqlite3_step(stmtOptOutByUserIdAndUsername);
     if (SQLITE_DONE != rc)
     {
-        // throw runtime_error("add error");
+        std::cout << rc << std::endl;
     }
     sqlite3_reset(stmtOptOutByUserIdAndUsername);
 }
