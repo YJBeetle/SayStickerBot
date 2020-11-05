@@ -141,8 +141,9 @@ int main()
         auto &api = bot.getApi();
         auto chatId = message->chat->id;
         auto userId = message->from->id;
+        auto username = message->from->username;
         sendMessage(api, chatId, "正在执行 OptOut 操作，此操作时间可能较长，请稍后...");
-
+        string stickerName = getStickerName(username); // 贴纸名字
         StickerSet::Ptr stickerSet;
         try
         {
