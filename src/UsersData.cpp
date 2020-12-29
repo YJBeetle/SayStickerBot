@@ -44,6 +44,7 @@ UsersData::UsersData(const std::string &dbFile)
     sqlite3_prepare_v2(db, R"(DELETE FROM "messages" WHERE "id" = ?;)", -1, &stmtRemove, NULL);
     sqlite3_prepare_v2(db, R"(DELETE FROM "messages" WHERE "fromUserId" = ?;)", -1, &stmtRemoveByUserId, NULL);
     sqlite3_prepare_v2(db, R"(INSERT INTO "options" ("fromUserId", "optout", "fromUsername") VALUES (?, ?, ?);)", -1, &stmtOptOutByUserIdAndUsername, NULL);
+    sqlite3_prepare_v2(db, R"(SELECT "fromUserId", "optout" FROM "options" WHERE ("fromUserId" = ?) AND ("optout" = 1);)", -1, &stmtSearchOptOutByUserId, NULL);
     sqlite3_prepare_v2(db, R"(SELECT "fromUserId", "optout" FROM "options" WHERE (("fromUserId" = ?) OR ("fromUsername" = ?)) AND ("optout" = 1);)", -1, &stmtSearchOptOutByUserIdOrUsername, NULL);
     sqlite3_prepare_v2(db, R"(SELECT "id", "fromUserId", "fromUsername", "content", "fileId" FROM "messages" WHERE ("id" = ?) ORDER BY "id" DESC LIMIT 20 OFFSET 0;)", // 删除检查所有者用 其实这里应该只会返回一个
                        -1,
@@ -93,6 +94,7 @@ UsersData::~UsersData()
     sqlite3_finalize(stmtSearchByContentFuzzy);
     sqlite3_finalize(stmtRemoveByUserId);
     sqlite3_finalize(stmtOptOutByUserIdAndUsername);
+    sqlite3_finalize(stmtSearchOptOutByUserId);
     sqlite3_finalize(stmtSearchOptOutByUserIdOrUsername);
     sqlite3_close(db);
 }
@@ -266,14 +268,24 @@ vector<UsersData::Column> UsersData::searchByContentFuzzy(const string &contentK
 
 bool UsersData::searchOptOutByUserIdOrUsername(int userId, const std::string &username)
 {
-    sqlite3_bind_int(stmtSearchOptOutByUserIdOrUsername, 1, userId);
-    sqlite3_bind_text(stmtSearchOptOutByUserIdOrUsername, 2, username.c_str(), -1, SQLITE_STATIC);
-    while (sqlite3_step(stmtSearchOptOutByUserIdOrUsername) == SQLITE_ROW) {
+    if (username.empty()) {
+        sqlite3_bind_int(stmtSearchOptOutByUserId, 1, userId);
+        while (sqlite3_step(stmtSearchOptOutByUserId) == SQLITE_ROW) {
+            sqlite3_reset(stmtSearchOptOutByUserId);
+            return true;
+        }
+        sqlite3_reset(stmtSearchOptOutByUserId);
+        return false;
+    } else {
+        sqlite3_bind_int(stmtSearchOptOutByUserIdOrUsername, 1, userId);
+        sqlite3_bind_text(stmtSearchOptOutByUserIdOrUsername, 2, username.c_str(), -1, SQLITE_STATIC);
+        while (sqlite3_step(stmtSearchOptOutByUserIdOrUsername) == SQLITE_ROW) {
+            sqlite3_reset(stmtSearchOptOutByUserIdOrUsername);
+            return true;
+        }
         sqlite3_reset(stmtSearchOptOutByUserIdOrUsername);
-        return true;
+        return false;
     }
-    sqlite3_reset(stmtSearchOptOutByUserIdOrUsername);
-    return false;
 }
 
 void UsersData::optOutByUserIdAndUsername(int userId, const std::string &username)
